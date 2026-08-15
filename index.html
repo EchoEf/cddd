@@ -86,7 +86,7 @@
     box-shadow: 0 4px 16px rgba(31,36,48,.08);
     overflow: auto;
   }
-  table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 920px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 820px; }
   thead th {
     background: linear-gradient(180deg, #f8f9fd 0%, #eef1f8 100%);
     padding: 12px 12px;
@@ -233,6 +233,12 @@
     flex-wrap: wrap;
     justify-content: center;
   }
+  .badge-mini {
+    font-size: 11px;
+    padding: 2px 7px;
+    vertical-align: middle;
+    margin-left: 4px;
+  }
 
   /* 访问人数（低调显示） */
   .visitor-count {
@@ -249,6 +255,40 @@
     backdrop-filter: blur(4px);
     z-index: 50;
     opacity: .85;
+  }
+
+  /* 回到顶部按钮（默认隐藏，移动端滚动后显示） */
+  .back-to-top {
+    display: none;
+    position: fixed;
+    right: 12px;
+    bottom: 50px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.92);
+    border: 1px solid var(--border);
+    box-shadow: 0 2px 8px rgba(31,36,48,.12);
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: var(--accent);
+    cursor: pointer;
+    z-index: 50;
+    opacity: 0;
+    transition: opacity .25s, transform .2s;
+    transform: translateY(10px);
+    backdrop-filter: blur(4px);
+  }
+  .back-to-top.show {
+    display: flex;
+    opacity: .9;
+    transform: translateY(0);
+  }
+  .back-to-top:hover { background: #f6f8fe; transform: translateY(-2px); }
+
+  @media (max-width: 768px) {
+    .back-to-top.show { display: flex; }
   }
 
   /* 视图切换按钮 */
@@ -345,7 +385,7 @@
     .view-toggle { display: block; }
     .scroll-hint { display: block; }
     .table-wrap { border-radius: 10px; }
-    table { min-width: 1050px; font-size: 12px; border-collapse: separate; border-spacing: 0; }
+    table { min-width: 900px; font-size: 12px; border-collapse: separate; border-spacing: 0; }
     thead th { padding: 8px 6px; }
     tbody td { padding: 8px 6px; }
     .rank { width: 26px; height: 26px; font-size: 12px; }
@@ -370,7 +410,7 @@
     .stats-bar { gap: 6px; }
     .stat-card { flex: 1 1 100%; padding: 8px 12px; }
     .stat-card .num { font-size: 16px; }
-    table { min-width: 980px; font-size: 11px; }
+    table { min-width: 820px; font-size: 11px; }
     .sugar-comment { max-width: 150px; font-size: 11px; }
   }
 
@@ -429,7 +469,6 @@
           <th data-key="h1">第一刀<span class="arrow"></span></th>
           <th data-key="h2">第二刀<span class="arrow"></span></th>
           <th data-key="h3">第三刀<span class="arrow"></span></th>
-          <th data-key="note">备注<span class="arrow"></span></th>
           <th data-key="sugar">糖王锐评<span class="arrow"></span></th>
         </tr>
       </thead>
@@ -446,6 +485,7 @@
 </div>
 
 <div class="visitor-count" id="visitor-count">👁 访问人数 加载中…</div>
+<div class="back-to-top" id="back-to-top" title="回到顶部">↑</div>
 
 <script>
 const data = [
@@ -599,7 +639,7 @@ const tbody = document.getElementById("tbody");
 const tableWrap = document.querySelector(".table-wrap");
 const cardList = document.getElementById("card-list");
 const viewToggleBtn = document.getElementById("view-toggle-btn");
-let viewMode = localStorage.getItem("gvg_view_mode") || "table";
+let viewMode = localStorage.getItem("gvg_view_mode") || (window.innerWidth > 768 ? "card" : "table");
 
 function hitVal(r, idx) { return idx < r.hits.length ? r.hits[idx][1] : -1; }
 function hitYiStr(r, idx) {
@@ -627,11 +667,10 @@ function escHtml(s) {
   return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
-function noteHtml(r) {
-  const parts = [];
-  if (r.isWater) parts.push('<span class="water">💧 三刀水</span>');
-  if (r.count < 3) parts.push(`<span class="incomplete-note">🔴 缺 ${3 - r.count} 刀</span>`);
-  return parts.length ? `<span class="note-box">${parts.join("")}</span>` : "—";
+function playerBadges(r) {
+  if (r.isWater) return ' <span class="water badge-mini" title="三刀均打铁匠">💧</span>';
+  if (r.count < 3) return ` <span class="incomplete-note badge-mini" title="缺 ${3 - r.count} 刀">🔴 缺${3 - r.count}</span>`;
+  return "";
 }
 
 function render() {
@@ -653,7 +692,6 @@ function render() {
       case "h1": va = hitVal(a,0); vb = hitVal(b,0); break;
       case "h2": va = hitVal(a,1); vb = hitVal(b,1); break;
       case "h3": va = hitVal(a,2); vb = hitVal(b,2); break;
-      case "note": va = a.count; vb = b.count; break;
       case "sugar": va = a.sugarComment; vb = b.sugarComment; break;
       default: va = a.totalRaw; vb = b.totalRaw;
     }
@@ -670,12 +708,11 @@ function render() {
     return `<tr class="${incomplete ? "incomplete" : ""}">
       <td><span class="rank ${rankCls}">${rank}</span></td>
       <td>${prevRankHtml(r, rank)}</td>
-      <td class="player">${r.player}</td>
+      <td class="player">${r.player}${playerBadges(r)}</td>
       <td class="total">${r.totalYi.toFixed(1)}</td>
       <td>${hitYiStr(r,0)}</td>
       <td>${hitYiStr(r,1)}</td>
       <td>${hitYiStr(r,2)}</td>
-      <td>${noteHtml(r)}</td>
       <td>${sugarHtml(r.sugarComment)}</td>
     </tr>`;
   }).join("");
@@ -689,7 +726,7 @@ function render() {
       <div class="player-card ${incomplete ? "incomplete" : ""}">
         <div class="card-header">
           <span class="rank ${rankCls}">${rank}</span>
-          <span class="player">${r.player}</span>
+          <span class="player">${r.player}${playerBadges(r)}</span>
           <span class="total">${r.totalYi.toFixed(1)}亿</span>
         </div>
         <div class="card-body">
@@ -697,7 +734,6 @@ function render() {
           <div class="card-row"><span>第一刀</span><span>${hitYiStr(r,0)}</span></div>
           <div class="card-row"><span>第二刀</span><span>${hitYiStr(r,1)}</span></div>
           <div class="card-row"><span>第三刀</span><span>${hitYiStr(r,2)}</span></div>
-          <div class="card-row"><span>备注</span><span>${noteHtml(r)}</span></div>
           <div class="card-row"><span>糖王锐评</span><span>${sugarHtml(r.sugarComment)}</span></div>
         </div>
       </div>
@@ -758,6 +794,19 @@ tableWrap.addEventListener("scroll", () => {
   document.getElementById("visitor-count").textContent =
     "👁 访问人数 " + (localStorage.getItem(VISIT_COUNT_KEY) || "0");
 })();
+
+// 回到顶部按钮（仅在移动端显示）
+const backToTop = document.getElementById("back-to-top");
+window.addEventListener("scroll", () => {
+  if (window.innerWidth <= 768 && window.scrollY > 400) {
+    backToTop.classList.add("show");
+  } else {
+    backToTop.classList.remove("show");
+  }
+}, { passive: true });
+backToTop.addEventListener("click", () => {
+  window.scrollTo({ top: 0, behavior: "smooth" });
+});
 
 render();
 applyView();
