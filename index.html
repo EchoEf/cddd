@@ -589,7 +589,7 @@
 <div class="container">
   <div class="header">
     <h1>⚔️ 工会战伤害统计 ⚔️</h1>
-    <div class="subtitle">每人统计三刀 · 单位：亿 · 点击表头可排序 · 已对比上一期排名</div>
+    <div class="subtitle">本期数据与糖王锐评由行天游整理提供；三刀水（三刀均打铁匠）是高难 Boss，坚持出刀就值得鼓励 💪</div>
   </div>
 
   <div class="stats-bar">
@@ -606,7 +606,7 @@
   </div>
 
   <div class="legend">
-    <span class="item"><span class="water">💧 三刀水</span> = 三刀均打铁匠</span>
+    <span class="item"><span class="water">三刀水</span> = 三刀均打铁匠</span>
     <span class="item"><span class="incomplete-note">🔴 缺刀</span> = 不足三刀（整行红底）</span>
     <span class="item"><span class="prev-new">✨ 新</span> = 本期新入榜</span>
     <span class="item"><span class="note-change-up">▲提升N</span> / <span class="note-change-down">▼下降N</span> 见上一期排名列</span>
@@ -836,7 +836,12 @@ function prevRankHtml(r, currentRank) {
   return `<span class="prev-rank">${r.lastRank}</span>${change}`;
 }
 
-function sugarHtml(text) {
+function sugarHtml(r) {
+  let text = r.sugarComment || "";
+  // 三刀水玩家统一在锐评里带上“三刀水”文字；若原评语已含则避免重复
+  if (r.isWater && !text.includes("三刀水")) {
+    text = (text ? "三刀水，" + text : "三刀水");
+  }
   if (!text) return "—";
   return `<span class="sugar-comment">${escHtml(text)}</span>`;
 }
@@ -846,7 +851,6 @@ function escHtml(s) {
 }
 
 function playerBadges(r) {
-  if (r.isWater) return ' <span class="water badge-mini" title="三刀均打铁匠">💧</span>';
   if (r.count < 3) return ` <span class="incomplete-note badge-mini" title="缺 ${3 - r.count} 刀">🔴 缺${3 - r.count}</span>`;
   return "";
 }
@@ -899,7 +903,7 @@ function render() {
       <td>${hitYiStr(r,0)}</td>
       <td>${hitYiStr(r,1)}</td>
       <td>${hitYiStr(r,2)}</td>
-      <td>${sugarHtml(r.sugarComment)}</td>
+      <td>${sugarHtml(r)}</td>
     </tr>`;
   }).join("");
 
@@ -920,7 +924,7 @@ function render() {
           <div class="card-row"><span>第一刀</span><span>${hitYiStr(r,0)}</span></div>
           <div class="card-row"><span>第二刀</span><span>${hitYiStr(r,1)}</span></div>
           <div class="card-row"><span>第三刀</span><span>${hitYiStr(r,2)}</span></div>
-          <div class="card-row"><span>糖王锐评</span><span>${sugarHtml(r.sugarComment)}</span></div>
+          <div class="card-row"><span>糖王锐评</span><span>${sugarHtml(r)}</span></div>
         </div>
       </div>
     `;
