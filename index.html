@@ -21,51 +21,163 @@
     --water-bg: linear-gradient(135deg, #e3f2fd 0%, #d0ebff 100%);
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
   body {
     font-family: "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
-    background: var(--bg);
+    background:
+      radial-gradient(1100px 520px at 8% -8%, #e3e9ff 0%, rgba(227,233,255,0) 60%),
+      radial-gradient(900px 480px at 108% 6%, #ffeef3 0%, rgba(255,238,243,0) 55%),
+      radial-gradient(900px 560px at 50% 112%, #e2f9f0 0%, rgba(226,249,240,0) 60%),
+      #f6f7fc;
+    background-attachment: fixed;
     color: var(--text);
     min-height: 100vh;
     padding: 32px 16px;
   }
+  ::selection { background: rgba(91,110,232,.2); }
   .container { max-width: 1120px; margin: 0 auto; }
 
+  /* 顶部横幅：毛玻璃卡片 + 流光效果 */
   .header {
+    position: relative;
     text-align: center;
-    margin-bottom: 24px;
+    margin-bottom: 22px;
+    padding: 30px 20px 26px;
+    border-radius: 22px;
+    background: linear-gradient(135deg, rgba(255,255,255,.85), rgba(255,255,255,.55));
+    border: 1px solid rgba(255,255,255,.9);
+    box-shadow: 0 10px 34px rgba(91,110,232,.12);
+    backdrop-filter: blur(10px);
+    overflow: hidden;
+  }
+  .header::before {
+    content: "";
+    position: absolute;
+    top: -70%;
+    left: -40%;
+    width: 50%;
+    height: 240%;
+    background: linear-gradient(100deg, transparent 20%, rgba(255,255,255,.6) 50%, transparent 80%);
+    transform: rotate(12deg);
+    animation: shine 6s ease-in-out infinite;
+    pointer-events: none;
+  }
+  @keyframes shine {
+    0%, 55%, 100% { left: -40%; }
+    25%, 35% { left: 115%; }
   }
   .header h1 {
-    font-size: 28px;
-    background: linear-gradient(135deg, #5b6ee8, #9b59b6);
+    font-size: 30px;
+    font-weight: 800;
+    background: linear-gradient(90deg, #5b6ee8, #9b59b6 45%, #e8734a);
+    background-size: 200% auto;
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
     letter-spacing: 2px;
+    animation: hue 8s linear infinite;
   }
-  .header .subtitle { color: var(--muted); margin-top: 6px; font-size: 14px; }
+  @keyframes hue {
+    to { background-position: 200% center; }
+  }
+  .header .subtitle { color: var(--muted); margin-top: 8px; font-size: 14px; letter-spacing: 1px; }
 
-  .stats-bar {
-    display: flex;
-    gap: 16px;
-    justify-content: center;
-    flex-wrap: wrap;
-    margin-bottom: 24px;
+  /* 前三名领奖台 */
+  .podium {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 22px;
   }
-  .stat-card {
+  .podium-card {
+    position: relative;
+    border-radius: 16px;
+    padding: 16px 12px 16px;
+    text-align: center;
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 14px 28px;
+    box-shadow: 0 4px 18px rgba(31,36,48,.08);
+    overflow: hidden;
+    transition: transform .2s, box-shadow .2s;
+  }
+  .podium-card:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(31,36,48,.15); }
+  .podium-card::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 4px;
+  }
+  .podium-card .medal { font-size: 32px; line-height: 1; filter: drop-shadow(0 3px 6px rgba(0,0,0,.18)); }
+  .podium-card .name { font-weight: 800; font-size: 16px; margin-top: 7px; }
+  .podium-card .score { font-weight: 800; font-size: 21px; margin-top: 2px; }
+  .podium-card .best { font-size: 12px; color: var(--muted); margin-top: 5px; }
+  .podium-card.p1 { background: linear-gradient(180deg, #fffdf3 0%, #fff4d6 100%); border-color: #f0dfae; }
+  .podium-card.p1 .score { color: #b26a00; }
+  .podium-card.p1::after { background: var(--gold); }
+  .podium-card.p2 { background: linear-gradient(180deg, #fbfcff 0%, #eff2f9 100%); border-color: #d5dcec; }
+  .podium-card.p2 .score { color: #5a6a86; }
+  .podium-card.p2::after { background: var(--silver); }
+  .podium-card.p3 { background: linear-gradient(180deg, #fdf8f3 0%, #f7ebdb 100%); border-color: #ead3ba; }
+  .podium-card.p3 .score { color: #a06235; }
+  .podium-card.p3::after { background: var(--bronze); }
+
+  /* 玩家搜索框 */
+  .toolbar {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+  .toolbar input {
+    width: min(380px, 100%);
+    padding: 10px 18px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: rgba(255,255,255,.92);
+    box-shadow: 0 2px 10px rgba(31,36,48,.07);
+    font-size: 14px;
+    color: var(--text);
+    outline: none;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .toolbar input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(91,110,232,.15);
+  }
+  .toolbar input::placeholder { color: #a6afc4; }
+
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 22px;
+  }
+  .stat-card {
+    position: relative;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px 12px;
     text-align: center;
-    box-shadow: 0 2px 8px rgba(31,36,48,.06);
-    min-width: 140px;
+    box-shadow: 0 2px 10px rgba(31,36,48,.06);
+    overflow: hidden;
+    transition: transform .2s, box-shadow .2s;
   }
+  .stat-card::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #5b6ee8, #9b59b6);
+  }
+  .stat-card:hover { transform: translateY(-3px); box-shadow: 0 10px 24px rgba(31,36,48,.13); }
   .stat-card .num {
-    font-size: 26px;
-    font-weight: 700;
+    font-size: 25px;
+    font-weight: 800;
     color: var(--accent);
+    font-variant-numeric: tabular-nums;
   }
-  .stat-card .label { font-size: 13px; color: var(--muted); margin-top: 2px; }
+  .stat-card .label { font-size: 13px; color: var(--muted); margin-top: 3px; }
+  .stat-card.warn::before { background: linear-gradient(90deg, #e8734a, #d64545); }
   .stat-card.warn .num { color: var(--red-text); }
 
   .legend {
@@ -86,18 +198,20 @@
     box-shadow: 0 4px 16px rgba(31,36,48,.08);
     overflow: auto;
   }
-  table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 820px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 820px; font-variant-numeric: tabular-nums; }
   thead th {
-    background: linear-gradient(180deg, #f8f9fd 0%, #eef1f8 100%);
-    padding: 12px 12px;
-    font-weight: 600;
+    background: linear-gradient(180deg, #f9fafe 0%, #edf0f9 100%);
+    padding: 13px 12px;
+    font-weight: 700;
+    font-size: 13px;
+    color: #3d4557;
     white-space: nowrap;
-    border-bottom: 2px solid var(--border);
+    border-bottom: 2px solid #dfe4f0;
     cursor: pointer;
     user-select: none;
-    transition: background .15s;
+    transition: background .15s, color .15s;
   }
-  thead th:hover { background: #e8ecf7; }
+  thead th:hover { background: #e6eaf7; color: var(--accent); }
   thead th .arrow { font-size: 11px; color: var(--accent); margin-left: 4px; }
   tbody td {
     padding: 11px 12px;
@@ -105,9 +219,17 @@
     border-bottom: 1px solid var(--border);
     white-space: nowrap;
   }
-  tbody tr { transition: background .15s; }
-  tbody tr:hover { background: #f6f8fe; }
+  tbody tr { transition: background .15s, box-shadow .15s; animation: rowIn .35s ease both; }
+  @keyframes rowIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  tbody tr:nth-child(even) { background: #fafbfe; }
+  tbody tr:hover { background: rgba(91,110,232,.07); }
   tbody tr:last-child td { border-bottom: none; }
+
+  /* 前三名行底色微调（跟随排序移动） */
+  tbody tr.top1 { background: linear-gradient(90deg, #fff8e3 0%, #fffdf6 100%); }
+  tbody tr.top2 { background: linear-gradient(90deg, #f4f6fb 0%, #fdfeff 100%); }
+  tbody tr.top3 { background: linear-gradient(90deg, #fcf2e8 0%, #fffaf5 100%); }
+  tbody tr.top1:hover, tbody tr.top2:hover, tbody tr.top3:hover { filter: brightness(.985); }
 
   /* 缺刀红底 */
   tr.incomplete { background: var(--red-bg); }
@@ -328,21 +450,43 @@
     gap: 12px;
   }
   .player-card {
+    position: relative;
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 14px;
-    box-shadow: 0 2px 8px rgba(31,36,48,.06);
+    border-radius: 16px;
+    padding: 14px 14px 14px 19px;
+    box-shadow: 0 2px 10px rgba(31,36,48,.06);
+    overflow: hidden;
+    transition: transform .2s, box-shadow .2s;
+    animation: rowIn .35s ease both;
   }
+  .player-card::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+    background: linear-gradient(180deg, #5b6ee8, #9b59b6);
+  }
+  .player-card:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(31,36,48,.13); }
   .player-card.incomplete { background: var(--red-bg); border-color: var(--red-border); }
+  .player-card.incomplete::before { background: linear-gradient(180deg, #e8734a, #d64545); }
   .card-header {
     display: flex;
     align-items: center;
     gap: 10px;
     margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed var(--border);
   }
   .card-header .player { flex: 1; font-weight: 700; font-size: 16px; }
-  .card-header .total { font-weight: 700; color: var(--accent); font-size: 16px; }
+  .card-header .total {
+    font-weight: 800;
+    font-size: 17px;
+    background: linear-gradient(90deg, #5b6ee8, #9b59b6);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
   .card-body {
     display: grid;
     grid-template-columns: auto 1fr;
@@ -370,23 +514,32 @@
     text-align: left;
     white-space: normal;
     word-break: break-word;
+    box-shadow: 0 1px 4px rgba(230,180,40,.15);
   }
+  .sugar-comment::before { content: "🍬 "; }
 
   /* 移动端兼容 */
   @media (max-width: 768px) {
     body { padding: 12px; }
+    .header { padding: 20px 12px 18px; border-radius: 16px; }
     .header h1 { font-size: 20px; letter-spacing: 1px; }
     .header .subtitle { font-size: 12px; }
-    .stats-bar { gap: 8px; margin-bottom: 16px; }
-    .stat-card { min-width: 0; padding: 10px 14px; flex: 1 1 calc(50% - 8px); }
-    .stat-card .num { font-size: 18px; }
+    .stats-bar { grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 14px; }
+    .stat-card { padding: 10px 8px; }
+    .stat-card .num { font-size: 19px; }
     .stat-card .label { font-size: 12px; }
+    .podium { gap: 8px; margin-bottom: 14px; }
+    .podium-card { padding: 12px 6px 12px; border-radius: 12px; }
+    .podium-card .medal { font-size: 24px; }
+    .podium-card .name { font-size: 13px; }
+    .podium-card .score { font-size: 16px; }
+    .podium-card .best { font-size: 10px; }
     .legend { font-size: 11px; gap: 8px 12px; margin-bottom: 14px; }
     .view-toggle { display: block; }
     .scroll-hint { display: block; }
     .table-wrap { border-radius: 10px; }
     table { min-width: 900px; font-size: 12px; border-collapse: separate; border-spacing: 0; }
-    thead th { padding: 8px 6px; }
+    thead th { padding: 8px 6px; font-size: 12px; }
     tbody td { padding: 8px 6px; }
     .rank { width: 26px; height: 26px; font-size: 12px; }
     .player { max-width: 96px; overflow: hidden; text-overflow: ellipsis; }
@@ -408,8 +561,8 @@
   @media (max-width: 420px) {
     .header h1 { font-size: 18px; }
     .stats-bar { gap: 6px; }
-    .stat-card { flex: 1 1 100%; padding: 8px 12px; }
-    .stat-card .num { font-size: 16px; }
+    .stat-card { padding: 8px 6px; }
+    .stat-card .num { font-size: 17px; }
     table { min-width: 820px; font-size: 11px; }
     .sugar-comment { max-width: 150px; font-size: 11px; }
   }
@@ -444,6 +597,12 @@
     <div class="stat-card"><div class="num" id="stat-avg">-</div><div class="label">💥 平均总伤害</div></div>
     <div class="stat-card"><div class="num" id="stat-max">-</div><div class="label">🏆 最高总伤害</div></div>
     <div class="stat-card warn"><div class="num" id="stat-miss">-</div><div class="label">⚠️ 缺刀玩家</div></div>
+  </div>
+
+  <div class="podium" id="podium"></div>
+
+  <div class="toolbar">
+    <input id="search" type="search" placeholder="🔍 搜索玩家名 / 锐评关键词，快速定位" autocomplete="off">
   </div>
 
   <div class="legend">
@@ -484,7 +643,7 @@
   </div>
 </div>
 
-<div class="visitor-count" id="visitor-count">👁 访问量 <span id="busuanzi_container_site_pv" style="display:none"><span id="busuanzi_value_site_pv"></span></span></div>
+<div class="visitor-count" id="visitor-count">👁 访问量 <span id="busuanzi_container_site_pv"><span id="busuanzi_value_site_pv">…</span></span></div>
 <div class="back-to-top" id="back-to-top" title="回到顶部">↑</div>
 
 <!-- 不蒜子访问统计（真实全站共享计数） -->
@@ -628,6 +787,21 @@ document.getElementById("stat-avg").textContent = avgYi + " 亿";
 document.getElementById("stat-max").textContent = maxYi + " 亿";
 document.getElementById("stat-miss").textContent = missCount + " 人";
 
+// 前三名领奖台
+(function renderPodium() {
+  const medals = ["🥇", "🥈", "🥉"], cls = ["p1", "p2", "p3"];
+  const top3 = [...rows].sort((a, b) => b.totalRaw - a.totalRaw).slice(0, 3);
+  document.getElementById("podium").innerHTML = top3.map((r, i) => {
+    const best = [...r.hits].sort((a, b) => b[1] - a[1])[0];
+    return `<div class="podium-card ${cls[i]}">
+      <div class="medal">${medals[i]}</div>
+      <div class="name">${escHtml(r.player)}</div>
+      <div class="score">${r.totalYi.toFixed(1)} 亿</div>
+      <div class="best">最高一刀 ${toYi(best[1])} 亿 · ${escHtml(best[0])}</div>
+    </div>`;
+  }).join("");
+})();
+
 // 缺刀提示
 const missRows = rows.filter(r => r.count < 3).sort((a, b) => a.count - b.count);
 document.getElementById("warn-list").innerHTML =
@@ -637,6 +811,7 @@ document.getElementById("warn-list").innerHTML =
 
 // 排序状态
 let sortKey = "total", sortAsc = false;
+let searchTerm = ""; // 玩家搜索关键词
 const tbody = document.getElementById("tbody");
 const tableWrap = document.querySelector(".table-wrap");
 const cardList = document.getElementById("card-list");
@@ -704,11 +879,19 @@ function render() {
     return sortAsc ? cmp : -cmp;
   });
 
-  tbody.innerHTML = sorted.map(r => {
+  // 搜索过滤（匹配玩家名或锐评内容）
+  const visible = sorted.filter(r =>
+    !searchTerm ||
+    r.player.toLowerCase().includes(searchTerm) ||
+    (r.sugarComment || "").toLowerCase().includes(searchTerm)
+  );
+
+  tbody.innerHTML = visible.map(r => {
     const rank = rankMap.get(r.player);
     const rankCls = rank === 1 ? "r1" : rank === 2 ? "r2" : rank === 3 ? "r3" : "";
     const incomplete = r.count < 3;
-    return `<tr class="${incomplete ? "incomplete" : ""}">
+    const topCls = !incomplete && rank <= 3 ? " top" + rank : "";
+    return `<tr class="${(incomplete ? "incomplete" : "") + topCls}">
       <td><span class="rank ${rankCls}">${rank}</span></td>
       <td>${prevRankHtml(r, rank)}</td>
       <td class="player">${r.player}${playerBadges(r)}</td>
@@ -721,7 +904,7 @@ function render() {
   }).join("");
 
   // 同时渲染卡片视图（可通过按钮切换）
-  cardList.innerHTML = sorted.map(r => {
+  cardList.innerHTML = visible.map(r => {
     const rank = rankMap.get(r.player);
     const rankCls = rank === 1 ? "r1" : rank === 2 ? "r2" : rank === 3 ? "r3" : "";
     const incomplete = r.count < 3;
@@ -757,6 +940,12 @@ document.querySelectorAll("#tbl thead th").forEach(th => {
     else { sortKey = key; sortAsc = key === "player"; }
     render();
   });
+});
+
+// 玩家搜索：输入即过滤表格与卡片
+document.getElementById("search").addEventListener("input", e => {
+  searchTerm = e.target.value.trim().toLowerCase();
+  render();
 });
 
 // 视图切换
