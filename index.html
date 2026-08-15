@@ -484,9 +484,11 @@
   </div>
 </div>
 
-<div class="visitor-count" id="visitor-count">👁 访问人数 加载中…</div>
+<div class="visitor-count" id="visitor-count">👁 访问量 <span id="busuanzi_container_site_pv" style="display:none"><span id="busuanzi_value_site_pv"></span></span></div>
 <div class="back-to-top" id="back-to-top" title="回到顶部">↑</div>
 
+<!-- 不蒜子访问统计（真实全站共享计数） -->
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 <script>
 const data = [
   { player:"花绮妙", hits:[["火神R",9093677532],["铁匠",9563481571],["铁匠",9478513209]] },
@@ -781,20 +783,8 @@ tableWrap.addEventListener("scroll", () => {
   if (hint) hint.style.opacity = "0";
 }, { passive: true });
 
-// 访问人数统计（UV 近似：每台浏览器首次访问计数 +1）
-(function () {
-  const VISITOR_KEY = "gvg_visitor_id_v1";
-  const VISIT_COUNT_KEY = "gvg_visit_count_v1";
-  let visitorId = localStorage.getItem(VISITOR_KEY);
-  if (!visitorId) {
-    visitorId = Math.random().toString(36).slice(2) + Date.now().toString(36);
-    localStorage.setItem(VISITOR_KEY, visitorId);
-    const count = (parseInt(localStorage.getItem(VISIT_COUNT_KEY) || "0", 10) || 0) + 1;
-    localStorage.setItem(VISIT_COUNT_KEY, count);
-  }
-  document.getElementById("visitor-count").textContent =
-    "👁 访问人数 " + (localStorage.getItem(VISIT_COUNT_KEY) || "0");
-})();
+// 访问统计已改用不蒜子（busuanzi）真实计数服务，见页脚引入的脚本
+// 页面浏览量显示在右下角：<span id="busuanzi_container_site_pv"> 内自动更新
 
 // 回到顶部按钮（仅在移动端显示）
 const backToTop = document.getElementById("back-to-top");
