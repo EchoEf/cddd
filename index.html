@@ -276,6 +276,88 @@
   }
   .clear-notes-btn:hover { background: var(--red-bg); }
 
+  /* 访问人数（低调显示） */
+  .visitor-count {
+    position: fixed;
+    right: 12px;
+    bottom: 12px;
+    background: rgba(255,255,255,.88);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 5px 13px;
+    font-size: 11px;
+    color: var(--muted);
+    box-shadow: 0 1px 5px rgba(31,36,48,.08);
+    backdrop-filter: blur(4px);
+    z-index: 50;
+    opacity: .85;
+  }
+
+  /* 视图切换按钮 */
+  .view-toggle {
+    display: none;
+    text-align: center;
+    margin-bottom: 14px;
+  }
+  .view-toggle button {
+    padding: 7px 18px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--card);
+    color: var(--text);
+    font-size: 13px;
+    cursor: pointer;
+    box-shadow: 0 1px 4px rgba(31,36,48,.06);
+  }
+  .view-toggle button:hover { background: #f6f8fe; border-color: #c3cae0; }
+
+  /* 滑动提示 */
+  .scroll-hint {
+    display: none;
+    text-align: center;
+    font-size: 12px;
+    color: var(--muted);
+    padding: 6px;
+    background: #f8f9fd;
+    border-bottom: 1px solid var(--border);
+    transition: opacity .3s;
+  }
+
+  /* 卡片视图 */
+  .card-list {
+    display: none;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .player-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px;
+    box-shadow: 0 2px 8px rgba(31,36,48,.06);
+  }
+  .player-card.incomplete { background: var(--red-bg); border-color: var(--red-border); }
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .card-header .player { flex: 1; font-weight: 700; font-size: 16px; }
+  .card-header .total { font-weight: 700; color: var(--accent); font-size: 16px; }
+  .card-body {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 8px 14px;
+    font-size: 13px;
+    align-items: center;
+  }
+  .card-row { display: contents; }
+  .card-row > span:first-child { color: var(--muted); text-align: left; }
+  .card-row > span:last-child { text-align: right; }
+  .card-row .note-box { justify-content: flex-end; }
+  .card-row .sugar-comment { text-align: right; max-width: none; }
+
   /* 糖王锐评 */
   .sugar-comment {
     display: inline-block;
@@ -302,8 +384,10 @@
     .stat-card .num { font-size: 18px; }
     .stat-card .label { font-size: 12px; }
     .legend { font-size: 11px; gap: 8px 12px; margin-bottom: 14px; }
+    .view-toggle { display: block; }
+    .scroll-hint { display: block; }
     .table-wrap { border-radius: 10px; }
-    table { min-width: 1050px; font-size: 12px; }
+    table { min-width: 1050px; font-size: 12px; border-collapse: separate; border-spacing: 0; }
     thead th { padding: 8px 6px; }
     tbody td { padding: 8px 6px; }
     .rank { width: 26px; height: 26px; font-size: 12px; }
@@ -311,6 +395,17 @@
     .sugar-comment { max-width: 180px; font-size: 12px; padding: 6px 9px; }
     .custom-note { max-width: 140px; }
     .footer { font-size: 12px; }
+
+    /* 表格视图下固定前3列，滑动时也能知道是谁 */
+    thead th:nth-child(1), tbody td:nth-child(1) { position: sticky; left: 0; z-index: 2; background: #f8f9fd; }
+    thead th:nth-child(2), tbody td:nth-child(2) { position: sticky; left: 38px; z-index: 2; background: #fff; }
+    thead th:nth-child(3), tbody td:nth-child(3) { position: sticky; left: 86px; z-index: 2; background: #fff; }
+    tbody tr:hover td:nth-child(1),
+    tbody tr:hover td:nth-child(2),
+    tbody tr:hover td:nth-child(3) { background: #f6f8fe; }
+    tr.incomplete td:nth-child(1),
+    tr.incomplete td:nth-child(2),
+    tr.incomplete td:nth-child(3) { background: var(--red-bg); }
   }
 
   @media (max-width: 420px) {
@@ -362,7 +457,12 @@
     <span class="item"><span class="custom-note">✏️ 备注可直接点击编辑</span> 保存于浏览器本地</span>
   </div>
 
+  <div class="view-toggle">
+    <button id="view-toggle-btn">📱 切换卡片视图</button>
+  </div>
+
   <div class="table-wrap">
+    <div class="scroll-hint" id="scroll-hint">← 左右滑动查看更多 →</div>
     <table id="tbl">
       <thead>
         <tr>
@@ -381,6 +481,8 @@
     </table>
   </div>
 
+  <div class="card-list" id="card-list"></div>
+
   <div class="footer">
     <div id="warn-list"></div>
     <div style="margin-top:10px">总伤害 = 三刀原始数值求和后再换算为亿（保留一位小数），避免分项四舍五入尾差</div>
@@ -388,6 +490,8 @@
     <button class="clear-notes-btn" id="clear-notes">🗑️ 清空全部自定义备注</button>
   </div>
 </div>
+
+<div class="visitor-count" id="visitor-count">👁 访问人数 加载中…</div>
 
 <script>
 const data = [
@@ -417,7 +521,7 @@ const data = [
   { player:"棱镜", hits:[["火神R",2107566102],["火神R",3448065705]] },
   { player:"希望", hits:[["铁匠",4794460466]] },
   { player:"教官", hits:[["铁匠",1123347844],["铁匠",889740169],["铁匠",2601933479]] },
-  { player:"暗星", hits:[["铁匠",4308226694]] },
+  { player:"暗星", hits:[["铁匠",4308226694],["重金属音乐",4419081592],["火神R",4921615525]] },
   { player:"君情其情", hits:[["秘材H",1303763959],["铁匠",1120451747],["铁匠",1866256956]] },
   { player:"行天游", hits:[["青瓜",1063845129],["火神R",1252805377],["重金属音乐",1248537239]] },
   { player:"WAYNE", hits:[["铁匠",2579237708],["铁匠",663233325],["铁匠",178853501]] },
@@ -539,6 +643,10 @@ document.getElementById("warn-list").innerHTML =
 // 排序状态
 let sortKey = "total", sortAsc = false;
 const tbody = document.getElementById("tbody");
+const tableWrap = document.querySelector(".table-wrap");
+const cardList = document.getElementById("card-list");
+const viewToggleBtn = document.getElementById("view-toggle-btn");
+let viewMode = localStorage.getItem("gvg_view_mode") || (window.innerWidth <= 768 ? "card" : "table");
 
 function hitVal(r, idx) { return idx < r.hits.length ? r.hits[idx][1] : -1; }
 function hitYiStr(r, idx) {
@@ -634,6 +742,30 @@ function render() {
     </tr>`;
   }).join("");
 
+  // 同时渲染卡片视图（移动端默认展示）
+  cardList.innerHTML = sorted.map(r => {
+    const rank = rankMap.get(r.player);
+    const rankCls = rank === 1 ? "r1" : rank === 2 ? "r2" : rank === 3 ? "r3" : "";
+    const incomplete = r.count < 3;
+    return `
+      <div class="player-card ${incomplete ? "incomplete" : ""}">
+        <div class="card-header">
+          <span class="rank ${rankCls}">${rank}</span>
+          <span class="player">${r.player}</span>
+          <span class="total">${r.totalYi.toFixed(1)}亿</span>
+        </div>
+        <div class="card-body">
+          <div class="card-row"><span>上一期排名</span><span>${prevRankHtml(r)}</span></div>
+          <div class="card-row"><span>第一刀</span><span>${hitYiStr(r,0)}</span></div>
+          <div class="card-row"><span>第二刀</span><span>${hitYiStr(r,1)}</span></div>
+          <div class="card-row"><span>第三刀</span><span>${hitYiStr(r,2)}</span></div>
+          <div class="card-row"><span>备注</span><span>${noteHtml(r, rank)}</span></div>
+          <div class="card-row"><span>糖王锐评</span><span>${sugarHtml(r.sugarComment)}</span></div>
+        </div>
+      </div>
+    `;
+  }).join("");
+
   // 更新表头箭头
   document.querySelectorAll("#tbl thead th").forEach(th => {
     const arrow = th.querySelector(".arrow");
@@ -650,8 +782,8 @@ document.querySelectorAll("#tbl thead th").forEach(th => {
   });
 });
 
-// 备注编辑：输入即保存（事件委托，对所有人开放）
-tbody.addEventListener("input", e => {
+// 备注编辑：输入即保存（事件委托，对所有人开放；覆盖表格与卡片视图）
+document.addEventListener("input", e => {
   const el = e.target.closest(".custom-note");
   if (!el) return;
   const player = el.dataset.player;
@@ -661,7 +793,7 @@ tbody.addEventListener("input", e => {
   saveCustomNotes();
 });
 // 回车不换行，直接结束编辑
-tbody.addEventListener("keydown", e => {
+document.addEventListener("keydown", e => {
   if (e.key === "Enter" && e.target.closest(".custom-note")) {
     e.preventDefault();
     e.target.blur();
@@ -676,7 +808,47 @@ document.getElementById("clear-notes").addEventListener("click", () => {
   render();
 });
 
+// 视图切换
+function applyView() {
+  if (viewMode === "card") {
+    tableWrap.style.display = "none";
+    cardList.style.display = "flex";
+    viewToggleBtn.textContent = "📊 切换表格视图";
+  } else {
+    tableWrap.style.display = "";
+    cardList.style.display = "none";
+    viewToggleBtn.textContent = "📱 切换卡片视图";
+  }
+  localStorage.setItem("gvg_view_mode", viewMode);
+}
+viewToggleBtn.addEventListener("click", () => {
+  viewMode = viewMode === "card" ? "table" : "card";
+  applyView();
+});
+
+// 滑动提示：滚动后自动淡出
+tableWrap.addEventListener("scroll", () => {
+  const hint = document.getElementById("scroll-hint");
+  if (hint) hint.style.opacity = "0";
+}, { passive: true });
+
+// 访问人数统计（UV 近似：每台浏览器首次访问计数 +1）
+(function () {
+  const VISITOR_KEY = "gvg_visitor_id_v1";
+  const VISIT_COUNT_KEY = "gvg_visit_count_v1";
+  let visitorId = localStorage.getItem(VISITOR_KEY);
+  if (!visitorId) {
+    visitorId = Math.random().toString(36).slice(2) + Date.now().toString(36);
+    localStorage.setItem(VISITOR_KEY, visitorId);
+    const count = (parseInt(localStorage.getItem(VISIT_COUNT_KEY) || "0", 10) || 0) + 1;
+    localStorage.setItem(VISIT_COUNT_KEY, count);
+  }
+  document.getElementById("visitor-count").textContent =
+    "👁 访问人数 " + (localStorage.getItem(VISIT_COUNT_KEY) || "0");
+})();
+
 render();
+applyView();
 </script>
 </body>
 </html>
