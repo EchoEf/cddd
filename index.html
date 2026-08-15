@@ -276,6 +276,52 @@
   }
   .clear-notes-btn:hover { background: var(--red-bg); }
 
+  /* 糖王锐评 */
+  .sugar-comment {
+    display: inline-block;
+    max-width: 260px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+    border: 1px solid #ffe082;
+    color: #6d4c00;
+    font-size: 13px;
+    line-height: 1.55;
+    text-align: left;
+    white-space: normal;
+    word-break: break-word;
+  }
+
+  /* 移动端兼容 */
+  @media (max-width: 768px) {
+    body { padding: 12px; }
+    .header h1 { font-size: 20px; letter-spacing: 1px; }
+    .header .subtitle { font-size: 12px; }
+    .stats-bar { gap: 8px; margin-bottom: 16px; }
+    .stat-card { min-width: 0; padding: 10px 14px; flex: 1 1 calc(50% - 8px); }
+    .stat-card .num { font-size: 18px; }
+    .stat-card .label { font-size: 12px; }
+    .legend { font-size: 11px; gap: 8px 12px; margin-bottom: 14px; }
+    .table-wrap { border-radius: 10px; }
+    table { min-width: 1050px; font-size: 12px; }
+    thead th { padding: 8px 6px; }
+    tbody td { padding: 8px 6px; }
+    .rank { width: 26px; height: 26px; font-size: 12px; }
+    .player { max-width: 96px; overflow: hidden; text-overflow: ellipsis; }
+    .sugar-comment { max-width: 180px; font-size: 12px; padding: 6px 9px; }
+    .custom-note { max-width: 140px; }
+    .footer { font-size: 12px; }
+  }
+
+  @media (max-width: 420px) {
+    .header h1 { font-size: 18px; }
+    .stats-bar { gap: 6px; }
+    .stat-card { flex: 1 1 100%; padding: 8px 12px; }
+    .stat-card .num { font-size: 16px; }
+    table { min-width: 980px; font-size: 11px; }
+    .sugar-comment { max-width: 150px; font-size: 11px; }
+  }
+
   .footer {
     margin-top: 20px;
     text-align: center;
@@ -328,6 +374,7 @@
           <th data-key="h2">第二刀<span class="arrow"></span></th>
           <th data-key="h3">第三刀<span class="arrow"></span></th>
           <th data-key="note">备注<span class="arrow"></span></th>
+          <th data-key="sugar">糖王锐评<span class="arrow"></span></th>
         </tr>
       </thead>
       <tbody id="tbody"></tbody>
@@ -379,6 +426,43 @@ const data = [
 ];
 
 // 上一期排名（从截图提取）
+
+// 糖王锐评（来自用户提供的本人评价截图）
+const sugarComments = {
+  "花绮妙": "随便一刀便是你们的极限，强如神",
+  "云小溪": "最高一刀105亿还有谁？脆了脆了",
+  "清蒸红烧LIYU": "不愧是我看中的千里马，黑马中的黑马",
+  "青柠": "老青依旧稳定发挥，可惜缺了个水刀，不然稳坐两百。",
+  "千岛佳": "曾被嘲讽逢场作戏，今朝锋芒出鞘，已然凌驾众人之上",
+  "吃饱不想家": "强者总是最后才出场的，强强强！",
+  "梦夜雨": "梦兄果然强势，实力均衡，强强强！",
+  "KKK影": "K博士文臣来的，能打这么高，都比你们武将强了",
+  "指挥官": "强强强",
+  "绯色": "绯佬稳定发挥，还刀了两个水刀，实力强悍",
+  "TRIGGER": "居然比上次打了这么多，虽说没有刀水，也很强了",
+  "辞忧": "可以可以，也进百亿了，强强强",
+  "如遇": "大佬高深莫测，无法评价",
+  "非洲小萌新": "大哥牛逼，三刀水还能进百亿，属实让小弟刮目相看",
+  "北冥虎纹鲨鱼": "大佬高深莫测，无法评价",
+  "枫葉繁花": "这次可惜了，没发挥出全部实力，但是进百亿了，顺便感谢老青，留下来好吗？",
+  "夜夜": "刀最快，跑最快",
+  "邃愿": "被爱情拘束，但依旧稳定发挥",
+  "奈乐": "稳住，两刀水",
+  "德胜": "三刀水",
+  "苏沐瞳": "小苏厉害了，可观可观",
+  "5MMM": "稳",
+  "棱镜": "皇上万岁！",
+  "厨厨厨": "三刀水，抽空时间打的，很给面子，可以可以",
+  "教官": "三刀水，向官敬礼！",
+  "希望": "很神秘",
+  "暗星": "搬图大师，情绪价值给的很足",
+  "君情其情": "7天不回来的大佬，竟然回来了！！！三刀水，可以可以",
+  "行天游": "别看了，我是唐人，下面是神人",
+  "WAYNE": "三刀水，前线士！",
+  "南山": "我的发？是三刀水，南山叔我会好好把你刻在耻棒上的",
+  "博哥儿": "不是哥们儿，读快点和名字就一样了",
+};
+
 const prevRank = {
   "花绮妙": 1,
   "云小溪": 2,
@@ -430,6 +514,7 @@ const rows = data.map(r => {
     isWater,
     count: r.hits.length,
     lastRank,
+    sugarComment: sugarComments[r.player] || "",
     change: lastRank === undefined ? null : lastRank, // 用于排序：值越大代表上期排名越低
   };
 });
@@ -466,6 +551,11 @@ function hitYiStr(r, idx) {
 function prevRankHtml(r) {
   if (r.lastRank === undefined) return '<span class="prev-new">✨ 新</span>';
   return `<span class="prev-rank">${r.lastRank}</span>`;
+}
+
+function sugarHtml(text) {
+  if (!text) return "—";
+  return `<span class="sugar-comment">${escHtml(text)}</span>`;
 }
 
 // ===== 自定义备注（可编辑，保存于 localStorage，对所有人开放）=====
@@ -518,6 +608,7 @@ function render() {
       case "h2": va = hitVal(a,1); vb = hitVal(b,1); break;
       case "h3": va = hitVal(a,2); vb = hitVal(b,2); break;
       case "note": va = a.count; vb = b.count; break;
+      case "sugar": va = a.sugarComment; vb = b.sugarComment; break;
       default: va = a.totalRaw; vb = b.totalRaw;
     }
     let cmp;
@@ -539,6 +630,7 @@ function render() {
       <td>${hitYiStr(r,1)}</td>
       <td>${hitYiStr(r,2)}</td>
       <td>${noteHtml(r, rank)}</td>
+      <td>${sugarHtml(r.sugarComment)}</td>
     </tr>`;
   }).join("");
 
