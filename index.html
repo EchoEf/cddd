@@ -523,7 +523,7 @@
     <div class="stat-card"><div class="num" id="stat-players">-</div><div class="label">👥 玩家总数</div></div>
     <div class="stat-card"><div class="num" id="stat-avg">-</div><div class="label">💥 平均总伤害</div></div>
     <div class="stat-card"><div class="num" id="stat-max">-</div><div class="label">🏆 最高总伤害</div></div>
-    <div class="stat-card warn"><div class="num" id="stat-miss">-</div><div class="label">⚠️ 缺刀玩家</div></div>
+    <div class="stat-card warn"><div class="num" id="stat-miss">-</div><div class="label">⚠️ 缺刀 / 未出刀</div></div>
   </div>
 
   <div class="podium" id="podium"></div>
@@ -700,6 +700,10 @@ const PERIODS = [
       { player:"奈乐", hits:[["过激派",6106989118],["重装狂战",3775547065],["双环",4114692339]] },
       { player:"TRIGGER", hits:[["重装狂战",3379496162],["过激派",6238820226],["双环",3891719278]] },
       { player:"雪花", hits:[["过激派",11818153368],["古铁",9200495412],["双环",9663610042]] },
+      // 联盟 32 人在册、本期未出刀成员（0 刀补录，红底展示）
+      { player:"WAYNE", hits:[] },
+      { player:"北冥虎纹鲨鱼", hits:[] },
+      { player:"希望", hits:[] },
     ],
     sugarComments: {
       "雪花": "乌云密布，迎接新神的降临，仅一次战斗便突破了联盟记录，同级人无法跨过的鸿沟，刀最早之人，拳头只是想快点喝血罢了，全体起立！🫡",
@@ -788,6 +792,11 @@ function hitYiStr(r, idx) {
 }
 
 function prevRankHtml(r, currentRank) {
+  if (r.count === 0) {
+    // 本期未出刀：不比较名次变化，仅显示上期排名 + 红字标注
+    const prev = r.lastRank === undefined ? "" : `<span class="prev-rank">${r.lastRank}</span> `;
+    return `${prev}<span class="miss">未出刀</span>`;
+  }
   if (r.lastRank === undefined) return '<span class="prev-new">✨ 新</span>';
   const delta = r.lastRank - currentRank;
   let change = "";
@@ -811,6 +820,7 @@ function escHtml(s) {
 }
 
 function playerBadges(r) {
+  if (r.count === 0) return ` <span class="incomplete-note badge-mini" title="本期未出刀">🔴 未出刀</span>`;
   if (r.count < 3) return ` <span class="incomplete-note badge-mini" title="缺 ${3 - r.count} 刀">🔴 缺${3 - r.count}</span>`;
   return "";
 }
@@ -819,6 +829,7 @@ function renderLegend(p) {
   const items = [];
   if (p.waterBoss) items.push(`<span class="item"><span class="water">三刀水</span> = 三刀均打${p.waterBoss}</span>`);
   items.push('<span class="item"><span class="incomplete-note">🔴 缺刀</span> = 不足三刀（整行红底）</span>');
+  items.push('<span class="item"><span class="miss">未出刀</span> = 联盟在册但本期一刀未打</span>');
   items.push('<span class="item"><span class="prev-new">✨ 新</span> = 本期新入榜</span>');
   items.push('<span class="item"><span class="note-change-up">▲提升N</span> / <span class="note-change-down">▼下降N</span> 见上一期排名列</span>');
   $("legend").innerHTML = items.join("");
@@ -947,13 +958,23 @@ function loadPeriod(idx) {
     </div>`;
   }).join("");
 
-  // 缺刀提示
-  const missRows = rows.filter(r => r.count < 3).sort((a, b) => a.count - b.count);
-  $("warn-list").innerHTML = missRows.length
-    ? '<div class="warn-box">⚠️ 以下玩家刀数不足三刀，可补充缺失数据：<br>' +
-      missRows.map(r => `&nbsp;&nbsp;• ${escHtml(r.player)}：当前 <b>${r.count}</b> 刀`).join("<br>") +
-      "</div>"
-    : "";
+  // 缺刀提示（区分"完全未出刀"与"刀数不足"两组）
+  const zeroRows = rows.filter(r => r.count === 0).sort((a, b) => (a.lastRank ?? 999) - (b.lastRank ?? 999));
+  const partRows = rows.filter(r => r.count > 0 && r.count < 3).sort((a, b) => a.count - b.count);
+  let warnHtml = "";
+  if (zeroRows.length) {
+    warnHtml += '⚠️ 以下联盟成员本期 <b>未出刀</b>：<br>' +
+      zeroRows.map(r => {
+        const prev = r.lastRank === undefined ? "" : `（上期第 ${r.lastRank} 名）`;
+        return `&nbsp;&nbsp;• ${escHtml(r.player)}：0 刀 ${prev}`;
+      }).join("<br>") + "<br>";
+  }
+  if (partRows.length) {
+    warnHtml += (zeroRows.length ? '<br>' : '') +
+      '⚠️ 以下玩家刀数不足三刀，可补充缺失数据：<br>' +
+      partRows.map(r => `&nbsp;&nbsp;• ${escHtml(r.player)}：当前 <b>${r.count}</b> 刀`).join("<br>");
+  }
+  $("warn-list").innerHTML = warnHtml ? `<div class="warn-box">${warnHtml}</div>` : "";
 
   render();
 }
