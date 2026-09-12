@@ -6,79 +6,40 @@
 <title>⚔️ 工会战伤害统计</title>
 <style>
   :root {
-    --bg: #f4f6fb;
     --card: #ffffff;
     --text: #1f2430;
     --muted: #6b7280;
     --border: #e5e8f0;
-    --accent: #5b6ee8;
-    --gold: linear-gradient(135deg, #f7c948 0%, #e8a317 100%);
-    --silver: linear-gradient(135deg, #cfd6e4 0%, #a9b4c9 100%);
-    --bronze: linear-gradient(135deg, #e0a370 0%, #b97a45 100%);
     --red-bg: #fdecea;
     --red-border: #f5c6c0;
     --red-text: #c0392b;
-    --water-bg: linear-gradient(135deg, #e3f2fd 0%, #d0ebff 100%);
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html { scroll-behavior: smooth; }
   body {
     font-family: "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
-    background:
-      radial-gradient(1100px 520px at 8% -8%, #e3e9ff 0%, rgba(227,233,255,0) 60%),
-      radial-gradient(900px 480px at 108% 6%, #ffeef3 0%, rgba(255,238,243,0) 55%),
-      radial-gradient(900px 560px at 50% 112%, #e2f9f0 0%, rgba(226,249,240,0) 60%),
-      #f6f7fc;
-    background-attachment: fixed;
+    background: #f5f6f8;
     color: var(--text);
     min-height: 100vh;
     padding: 32px 16px;
   }
-  ::selection { background: rgba(91,110,232,.2); }
+  ::selection { background: rgba(31,36,48,.08); }
   .container { max-width: 1120px; margin: 0 auto; }
 
-  /* 顶部横幅：毛玻璃卡片 + 流光效果 */
+  /* 顶部横幅 */
   .header {
-    position: relative;
     text-align: center;
     margin-bottom: 22px;
-    padding: 30px 20px 26px;
-    border-radius: 22px;
-    background: linear-gradient(135deg, rgba(255,255,255,.85), rgba(255,255,255,.55));
-    border: 1px solid rgba(255,255,255,.9);
-    box-shadow: 0 10px 34px rgba(91,110,232,.12);
-    backdrop-filter: blur(10px);
-    overflow: hidden;
-  }
-  .header::before {
-    content: "";
-    position: absolute;
-    top: -70%;
-    left: -40%;
-    width: 50%;
-    height: 240%;
-    background: linear-gradient(100deg, transparent 20%, rgba(255,255,255,.6) 50%, transparent 80%);
-    transform: rotate(12deg);
-    animation: shine 6s ease-in-out infinite;
-    pointer-events: none;
-  }
-  @keyframes shine {
-    0%, 55%, 100% { left: -40%; }
-    25%, 35% { left: 115%; }
+    padding: 26px 20px 24px;
+    border-radius: 14px;
+    background: var(--card);
+    border: 1px solid var(--border);
   }
   .header h1 {
-    font-size: 30px;
-    font-weight: 800;
-    background: linear-gradient(90deg, #5b6ee8, #9b59b6 45%, #e8734a);
-    background-size: 200% auto;
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--text);
     letter-spacing: 2px;
-    animation: hue 8s linear infinite;
-  }
-  @keyframes hue {
-    to { background-position: 200% center; }
   }
   .header .subtitle { color: var(--muted); margin-top: 8px; font-size: 14px; letter-spacing: 1px; }
 
@@ -91,25 +52,19 @@
     margin-bottom: 20px;
   }
   .ptab {
-    padding: 9px 24px;
+    padding: 8px 22px;
     border-radius: 999px;
     border: 1px solid var(--border);
-    background: rgba(255,255,255,.92);
+    background: var(--card);
     color: var(--text);
     font-size: 14px;
-    font-weight: 700;
+    font-weight: 600;
     letter-spacing: 1px;
     cursor: pointer;
-    box-shadow: 0 2px 8px rgba(31,36,48,.07);
-    transition: transform .18s, border-color .18s, background .18s, box-shadow .18s;
+    transition: border-color .15s, background .15s;
   }
-  .ptab:hover { transform: translateY(-1px); border-color: #c3cae0; }
-  .ptab.active {
-    background: linear-gradient(135deg, #5b6ee8, #9b59b6);
-    color: #fff;
-    border-color: transparent;
-    box-shadow: 0 6px 16px rgba(91,110,232,.38);
-  }
+  .ptab:hover { border-color: #c9cfdd; }
+  .ptab.active { background: var(--text); color: #fff; border-color: var(--text); }
   .ptab .ptag {
     display: inline-block;
     font-size: 11px;
@@ -117,10 +72,10 @@
     border-radius: 999px;
     margin-left: 6px;
     vertical-align: 1px;
-    background: #fff3bf;
-    color: #7a6000;
+    background: #eef0f4;
+    color: var(--muted);
   }
-  .ptab.active .ptag { background: rgba(255,255,255,.28); color: #fff; }
+  .ptab.active .ptag { background: rgba(255,255,255,.22); color: #fff; }
 
   /* 前三名领奖台 */
   .podium {
@@ -130,36 +85,16 @@
     margin-bottom: 22px;
   }
   .podium-card {
-    position: relative;
-    border-radius: 16px;
-    padding: 16px 12px 16px;
+    border-radius: 14px;
+    padding: 16px 12px;
     text-align: center;
     background: var(--card);
     border: 1px solid var(--border);
-    box-shadow: 0 4px 18px rgba(31,36,48,.08);
-    overflow: hidden;
-    transition: transform .2s, box-shadow .2s;
   }
-  .podium-card:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(31,36,48,.15); }
-  .podium-card::after {
-    content: "";
-    position: absolute;
-    left: 0; right: 0; bottom: 0;
-    height: 4px;
-  }
-  .podium-card .medal { font-size: 32px; line-height: 1; filter: drop-shadow(0 3px 6px rgba(0,0,0,.18)); }
-  .podium-card .name { font-weight: 800; font-size: 16px; margin-top: 7px; }
-  .podium-card .score { font-weight: 800; font-size: 21px; margin-top: 2px; }
+  .podium-card .medal { font-size: 30px; line-height: 1; }
+  .podium-card .name { font-weight: 700; font-size: 16px; margin-top: 7px; }
+  .podium-card .score { font-weight: 700; font-size: 20px; margin-top: 2px; }
   .podium-card .best { font-size: 12px; color: var(--muted); margin-top: 5px; }
-  .podium-card.p1 { background: linear-gradient(180deg, #fffdf3 0%, #fff4d6 100%); border-color: #f0dfae; }
-  .podium-card.p1 .score { color: #b26a00; }
-  .podium-card.p1::after { background: var(--gold); }
-  .podium-card.p2 { background: linear-gradient(180deg, #fbfcff 0%, #eff2f9 100%); border-color: #d5dcec; }
-  .podium-card.p2 .score { color: #5a6a86; }
-  .podium-card.p2::after { background: var(--silver); }
-  .podium-card.p3 { background: linear-gradient(180deg, #fdf8f3 0%, #f7ebdb 100%); border-color: #ead3ba; }
-  .podium-card.p3 .score { color: #a06235; }
-  .podium-card.p3::after { background: var(--bronze); }
 
   /* 玩家搜索框 */
   .toolbar {
@@ -172,17 +107,13 @@
     padding: 10px 18px;
     border-radius: 999px;
     border: 1px solid var(--border);
-    background: rgba(255,255,255,.92);
-    box-shadow: 0 2px 10px rgba(31,36,48,.07);
+    background: var(--card);
     font-size: 14px;
     color: var(--text);
     outline: none;
-    transition: border-color .15s, box-shadow .15s;
+    transition: border-color .15s;
   }
-  .toolbar input:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(91,110,232,.15);
-  }
+  .toolbar input:focus { border-color: #b6bdcd; }
   .toolbar input::placeholder { color: #a6afc4; }
 
   .stats-bar {
@@ -192,32 +123,19 @@
     margin-bottom: 22px;
   }
   .stat-card {
-    position: relative;
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 16px;
+    border-radius: 14px;
     padding: 16px 12px;
     text-align: center;
-    box-shadow: 0 2px 10px rgba(31,36,48,.06);
-    overflow: hidden;
-    transition: transform .2s, box-shadow .2s;
   }
-  .stat-card::before {
-    content: "";
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, #5b6ee8, #9b59b6);
-  }
-  .stat-card:hover { transform: translateY(-3px); box-shadow: 0 10px 24px rgba(31,36,48,.13); }
   .stat-card .num {
-    font-size: 25px;
-    font-weight: 800;
-    color: var(--accent);
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text);
     font-variant-numeric: tabular-nums;
   }
   .stat-card .label { font-size: 13px; color: var(--muted); margin-top: 3px; }
-  .stat-card.warn::before { background: linear-gradient(90deg, #e8734a, #d64545); }
   .stat-card.warn .num { color: var(--red-text); }
 
   .legend {
@@ -233,43 +151,34 @@
 
   .table-wrap {
     background: var(--card);
-    border-radius: 16px;
+    border-radius: 14px;
     border: 1px solid var(--border);
-    box-shadow: 0 4px 16px rgba(31,36,48,.08);
     overflow: auto;
   }
   table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 820px; font-variant-numeric: tabular-nums; }
   thead th {
-    background: linear-gradient(180deg, #f9fafe 0%, #edf0f9 100%);
-    padding: 13px 12px;
-    font-weight: 700;
+    background: #f7f8fa;
+    padding: 12px;
+    font-weight: 600;
     font-size: 13px;
-    color: #3d4557;
+    color: #4a5364;
     white-space: nowrap;
-    border-bottom: 2px solid #dfe4f0;
+    border-bottom: 1px solid var(--border);
     cursor: pointer;
     user-select: none;
-    transition: background .15s, color .15s;
   }
-  thead th:hover { background: #e6eaf7; color: var(--accent); }
-  thead th .arrow { font-size: 11px; color: var(--accent); margin-left: 4px; }
+  thead th:hover { background: #f0f2f6; }
+  thead th .arrow { font-size: 11px; color: var(--muted); margin-left: 4px; }
   tbody td {
     padding: 11px 12px;
     text-align: center;
     border-bottom: 1px solid var(--border);
     white-space: nowrap;
   }
-  tbody tr { transition: background .15s, box-shadow .15s; animation: rowIn .35s ease both; }
-  @keyframes rowIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
-  tbody tr:nth-child(even) { background: #fafbfe; }
-  tbody tr:hover { background: rgba(91,110,232,.07); }
+  tbody tr { transition: background .15s; }
+  tbody tr:nth-child(even) { background: #fafbfd; }
+  tbody tr:hover { background: #f2f4f9; }
   tbody tr:last-child td { border-bottom: none; }
-
-  /* 前三名行底色微调（跟随排序移动） */
-  tbody tr.top1 { background: linear-gradient(90deg, #fff8e3 0%, #fffdf6 100%); }
-  tbody tr.top2 { background: linear-gradient(90deg, #f4f6fb 0%, #fdfeff 100%); }
-  tbody tr.top3 { background: linear-gradient(90deg, #fcf2e8 0%, #fffaf5 100%); }
-  tbody tr.top1:hover, tbody tr.top2:hover, tbody tr.top3:hover { filter: brightness(.985); }
 
   /* 缺刀红底 */
   tr.incomplete { background: var(--red-bg); }
@@ -282,19 +191,16 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 32px; height: 32px;
+    width: 30px; height: 30px;
     border-radius: 50%;
-    font-weight: 700;
-    color: #555;
-    background: #eef1f8;
+    font-weight: 600;
+    color: #4a5364;
+    background: #f1f3f6;
     font-size: 14px;
   }
-  .rank.r1 { background: var(--gold); color: #7a5200; box-shadow: 0 2px 6px rgba(232,163,23,.4); }
-  .rank.r2 { background: var(--silver); color: #4a5568; box-shadow: 0 2px 6px rgba(169,180,201,.4); }
-  .rank.r3 { background: var(--bronze); color: #6b3e1d; box-shadow: 0 2px 6px rgba(185,122,69,.4); }
 
   .player { font-weight: 600; }
-  .total { font-weight: 700; color: var(--accent); font-size: 15px; }
+  .total { font-weight: 700; }
 
   .boss-tag {
     display: inline-block;
@@ -303,35 +209,22 @@
     font-size: 12px;
     margin-left: 6px;
     vertical-align: middle;
+    background: #f1f3f6;
+    border: 1px solid #e3e7ef;
+    color: #4a5364;
   }
-  .boss-铁匠 { background: #e8eaf6; color: #4a55a2; }
-  .boss-火神R { background: #fdecea; color: #c0392b; }
-  .boss-青瓜 { background: #e8f7ec; color: #27763f; }
-  .boss-重金属音乐 { background: #f3e8fd; color: #7b3fa0; }
-  .boss-秘材H { background: #fff3e0; color: #b26a00; }
-  .boss-重装狂战 { background: #fde3e3; color: #c92a2a; }
-  .boss-古铁 { background: #e1effd; color: #1864ab; }
-  .boss-双环 { background: #efe9fc; color: #7048e8; }
-  .boss-过激派 { background: #e2f6e9; color: #2b8a3e; }
-  .boss-炽焰B { background: #ffefd9; color: #d9480f; }
 
-  /* 三刀水备注美化 */
+  /* 三刀水备注 */
   .water {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    padding: 4px 12px;
+    padding: 3px 10px;
     border-radius: 999px;
-    background: var(--water-bg);
-    border: 1px solid #b3d9f5;
-    color: #1a6fb5;
+    background: #f1f3f6;
+    border: 1px solid #e3e7ef;
+    color: #4a5364;
     font-weight: 600;
-    font-size: 13px;
-    animation: wave 2.4s ease-in-out infinite;
-  }
-  @keyframes wave {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(80,160,230,.25); }
-    50% { box-shadow: 0 0 0 6px rgba(80,160,230,0); }
+    font-size: 12px;
   }
 
   .incomplete-note {
@@ -340,8 +233,8 @@
     gap: 4px;
     padding: 4px 12px;
     border-radius: 999px;
-    background: #fdecea;
-    border: 1px solid #f5c6c0;
+    background: var(--red-bg);
+    border: 1px solid var(--red-border);
     color: var(--red-text);
     font-weight: 600;
     font-size: 13px;
@@ -356,7 +249,7 @@
     padding: 3px 8px;
     border-radius: 8px;
     font-weight: 600;
-    background: #f1f3f9;
+    background: #f1f3f6;
     color: #4a5364;
   }
   .prev-new {
@@ -364,9 +257,10 @@
     align-items: center;
     padding: 3px 10px;
     border-radius: 999px;
-    background: linear-gradient(135deg, #fff9c4 0%, #fff176 100%);
-    color: #7a6000;
-    font-weight: 700;
+    background: #f1f3f6;
+    border: 1px solid #e3e7ef;
+    color: #4a5364;
+    font-weight: 600;
     font-size: 12px;
   }
 
@@ -377,9 +271,9 @@
     gap: 3px;
     padding: 3px 9px;
     border-radius: 999px;
-    background: #e8f7ec;
-    color: #207a3d;
-    font-weight: 700;
+    background: #eef7f0;
+    color: #2b8a3e;
+    font-weight: 600;
     font-size: 12px;
   }
   .note-change-down {
@@ -388,9 +282,9 @@
     gap: 3px;
     padding: 3px 9px;
     border-radius: 999px;
-    background: #fdecea;
-    color: #b93b2b;
-    font-weight: 700;
+    background: #fdf0ef;
+    color: #c0392b;
+    font-weight: 600;
     font-size: 12px;
   }
   .note-box {
@@ -412,14 +306,12 @@
     position: fixed;
     right: 12px;
     bottom: 12px;
-    background: rgba(255,255,255,.88);
+    background: var(--card);
     border: 1px solid var(--border);
     border-radius: 999px;
     padding: 5px 13px;
     font-size: 11px;
     color: var(--muted);
-    box-shadow: 0 1px 5px rgba(31,36,48,.08);
-    backdrop-filter: blur(4px);
     z-index: 50;
     opacity: .85;
   }
@@ -433,26 +325,24 @@
     width: 56px;
     height: 56px;
     border-radius: 50%;
-    background: rgba(255,255,255,.96);
+    background: var(--card);
     border: 1px solid var(--border);
-    box-shadow: 0 4px 14px rgba(31,36,48,.18);
     align-items: center;
     justify-content: center;
     font-size: 26px;
-    color: var(--accent);
+    color: #4a5364;
     cursor: pointer;
     z-index: 50;
     opacity: 0;
     transition: opacity .25s, transform .2s;
     transform: translateY(10px);
-    backdrop-filter: blur(4px);
   }
   .back-to-top.show {
     display: flex;
     opacity: .95;
     transform: translateY(0);
   }
-  .back-to-top:hover { background: #f6f8fe; transform: translateY(-2px); }
+  .back-to-top:hover { background: #f2f4f9; transform: translateY(-2px); }
 
   @media (max-width: 768px) {
     .back-to-top.show { display: flex; }
@@ -472,9 +362,8 @@
     color: var(--text);
     font-size: 13px;
     cursor: pointer;
-    box-shadow: 0 1px 4px rgba(31,36,48,.06);
   }
-  .view-toggle button:hover { background: #f6f8fe; border-color: #c3cae0; }
+  .view-toggle button:hover { background: #f2f4f9; }
 
   /* 滑动提示 */
   .scroll-hint {
@@ -483,7 +372,7 @@
     font-size: 12px;
     color: var(--muted);
     padding: 6px;
-    background: #f8f9fd;
+    background: #f7f8fa;
     border-bottom: 1px solid var(--border);
     transition: opacity .3s;
   }
@@ -498,23 +387,19 @@
     position: relative;
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 16px;
+    border-radius: 14px;
     padding: 14px 14px 14px 19px;
-    box-shadow: 0 2px 10px rgba(31,36,48,.06);
     overflow: hidden;
-    transition: transform .2s, box-shadow .2s;
-    animation: rowIn .35s ease both;
   }
   .player-card::before {
     content: "";
     position: absolute;
     left: 0; top: 0; bottom: 0;
     width: 4px;
-    background: linear-gradient(180deg, #5b6ee8, #9b59b6);
+    background: #e3e7ef;
   }
-  .player-card:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(31,36,48,.13); }
   .player-card.incomplete { background: var(--red-bg); border-color: var(--red-border); }
-  .player-card.incomplete::before { background: linear-gradient(180deg, #e8734a, #d64545); }
+  .player-card.incomplete::before { background: var(--red-border); }
   .card-header {
     display: flex;
     align-items: center;
@@ -524,14 +409,7 @@
     border-bottom: 1px dashed var(--border);
   }
   .card-header .player { flex: 1; font-weight: 700; font-size: 16px; }
-  .card-header .total {
-    font-weight: 800;
-    font-size: 17px;
-    background: linear-gradient(90deg, #5b6ee8, #9b59b6);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
+  .card-header .total { font-weight: 700; font-size: 17px; }
   .card-body {
     display: grid;
     grid-template-columns: auto 1fr;
@@ -551,22 +429,21 @@
     max-width: 260px;
     padding: 8px 12px;
     border-radius: 10px;
-    background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
-    border: 1px solid #ffe082;
-    color: #6d4c00;
+    background: #fafafa;
+    border: 1px solid #ececec;
+    color: #57534e;
     font-size: 13px;
     line-height: 1.55;
     text-align: left;
     white-space: normal;
     word-break: break-word;
-    box-shadow: 0 1px 4px rgba(230,180,40,.15);
   }
   .sugar-comment::before { content: "🍬 "; }
 
   /* 移动端兼容 */
   @media (max-width: 768px) {
     body { padding: 12px; }
-    .header { padding: 20px 12px 18px; border-radius: 16px; }
+    .header { padding: 20px 12px 18px; border-radius: 12px; }
     .header h1 { font-size: 20px; letter-spacing: 1px; }
     .header .subtitle { font-size: 12px; }
     .period-tabs { gap: 8px; margin-bottom: 14px; }
@@ -577,7 +454,7 @@
     .stat-card .num { font-size: 19px; }
     .stat-card .label { font-size: 12px; }
     .podium { gap: 8px; margin-bottom: 14px; }
-    .podium-card { padding: 12px 6px 12px; border-radius: 12px; }
+    .podium-card { padding: 12px 6px; border-radius: 12px; }
     .podium-card .medal { font-size: 24px; }
     .podium-card .name { font-size: 13px; }
     .podium-card .score { font-size: 16px; }
@@ -595,12 +472,12 @@
     .footer { font-size: 12px; }
 
     /* 表格视图下固定前3列，滑动时也能知道是谁 */
-    thead th:nth-child(1), tbody td:nth-child(1) { position: sticky; left: 0; z-index: 2; background: #f8f9fd; }
+    thead th:nth-child(1), tbody td:nth-child(1) { position: sticky; left: 0; z-index: 2; background: #f7f8fa; }
     thead th:nth-child(2), tbody td:nth-child(2) { position: sticky; left: 38px; z-index: 2; background: #fff; }
     thead th:nth-child(3), tbody td:nth-child(3) { position: sticky; left: 86px; z-index: 2; background: #fff; }
     tbody tr:hover td:nth-child(1),
     tbody tr:hover td:nth-child(2),
-    tbody tr:hover td:nth-child(3) { background: #f6f8fe; }
+    tbody tr:hover td:nth-child(3) { background: #f2f4f9; }
     tr.incomplete td:nth-child(1),
     tr.incomplete td:nth-child(2),
     tr.incomplete td:nth-child(3) { background: var(--red-bg); }
@@ -995,11 +872,9 @@ function render() {
 
   tbody.innerHTML = visible.map(r => {
     const rank = rankMap.get(r.player);
-    const rankCls = rank === 1 ? "r1" : rank === 2 ? "r2" : rank === 3 ? "r3" : "";
     const incomplete = r.count < 3;
-    const topCls = !incomplete && rank <= 3 ? " top" + rank : "";
-    return `<tr class="${(incomplete ? "incomplete" : "") + topCls}">
-      <td><span class="rank ${rankCls}">${rank}</span></td>
+    return `<tr class="${incomplete ? "incomplete" : ""}">
+      <td><span class="rank">${rank}</span></td>
       <td>${prevRankHtml(r, rank)}</td>
       <td class="player">${escHtml(r.player)}${playerBadges(r)}</td>
       <td class="total">${r.totalYi.toFixed(1)}</td>
@@ -1013,12 +888,11 @@ function render() {
   // 同时渲染卡片视图（可通过按钮切换）
   cardList.innerHTML = visible.map(r => {
     const rank = rankMap.get(r.player);
-    const rankCls = rank === 1 ? "r1" : rank === 2 ? "r2" : rank === 3 ? "r3" : "";
     const incomplete = r.count < 3;
     return `
       <div class="player-card ${incomplete ? "incomplete" : ""}">
         <div class="card-header">
-          <span class="rank ${rankCls}">${rank}</span>
+          <span class="rank">${rank}</span>
           <span class="player">${escHtml(r.player)}${playerBadges(r)}</span>
           <span class="total">${r.totalYi.toFixed(1)}亿</span>
         </div>
@@ -1061,11 +935,11 @@ function loadPeriod(idx) {
   $("stat-miss").textContent = missCount + " 人";
 
   // 前三名领奖台
-  const medals = ["🥇", "🥈", "🥉"], cls = ["p1", "p2", "p3"];
+  const medals = ["🥇", "🥈", "🥉"];
   const top3 = [...rows].sort((a, b) => b.totalRaw - a.totalRaw).slice(0, 3);
   $("podium").innerHTML = top3.map((r, i) => {
     const best = [...r.hits].sort((a, b) => b[1] - a[1])[0];
-    return `<div class="podium-card ${cls[i]}">
+    return `<div class="podium-card">
       <div class="medal">${medals[i]}</div>
       <div class="name">${escHtml(r.player)}</div>
       <div class="score">${r.totalYi.toFixed(1)} 亿</div>
