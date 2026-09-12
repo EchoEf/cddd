@@ -301,6 +301,19 @@
     margin-left: 4px;
   }
 
+  /* 已退盟（不在最新联盟名单，中性灰标注） */
+  .gone-badge {
+    display: inline-block;
+    font-size: 11px;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: #f1f2f5;
+    border: 1px solid #dcdfe6;
+    color: #8a8f9c;
+    vertical-align: middle;
+    margin-left: 4px;
+  }
+
   /* 访问人数（低调显示） */
   .visitor-count {
     position: fixed;
@@ -579,6 +592,18 @@
    3. "上一期排名"自动取自上一期榜单；改名玩家用 alias 做映射（当前名 -> 上期名）
    4. 页面默认展示数组中最后一期（最新一期）
 ==================================================== */
+// 最新一期联盟在册名单（32/32，2026-09-13 截图核对）：
+// 不在此名单中的历史玩家视为已退盟/被踢，网页用灰色「已退盟」标注区分
+const ROSTER = new Set([
+  "花绮妙", "千岛佳", "博哥儿", "云小溪", "KKK影",
+  "行天游", "5MMM", "暗星", "指挥官", "辞忧",
+  "非洲小萌新", "梦夜雨", "棱镜", "教官", "君情其情",
+  "如遇", "派大星", "雪花", "青柠", "吃饱不想家",
+  "德胜", "清蒸红烧LIYU", "南山", "厨厨厨", "绯色",
+  "夜夜", "WAYNE", "苏沐瞳", "奈乐", "TRIGGER",
+  "北冥虎纹鲨鱼", "希望",
+]);
+
 const PERIODS = [
   {
     id: 1,
@@ -742,6 +767,7 @@ const toYi = n => Math.round(n / 1e8 * 10) / 10;
 const processed = PERIODS.map(p => p.data.map(r => {
   const totalRaw = r.hits.reduce((s, h) => s + h[1], 0);
   const isWater = !!p.waterBoss && r.hits.length === 3 && r.hits.every(h => h[0] === p.waterBoss);
+  const rosterKey = (p.alias && p.alias[r.player]) || r.player; // 改名玩家按旧名对名单
   return {
     player: r.player,
     hits: r.hits,
@@ -751,6 +777,7 @@ const processed = PERIODS.map(p => p.data.map(r => {
     isWater,
     count: r.hits.length,
     sugarComment: p.sugarComments[r.player] || "",
+    gone: !ROSTER.has(rosterKey), // 已不在最新联盟名单
   };
 }));
 
@@ -820,9 +847,11 @@ function escHtml(s) {
 }
 
 function playerBadges(r) {
-  if (r.count === 0) return ` <span class="incomplete-note badge-mini" title="本期未出刀">🔴 未出刀</span>`;
-  if (r.count < 3) return ` <span class="incomplete-note badge-mini" title="缺 ${3 - r.count} 刀">🔴 缺${3 - r.count}</span>`;
-  return "";
+  let s = "";
+  if (r.gone) s += ` <span class="gone-badge" title="已不在最新联盟 32 人在册名单">已退盟</span>`;
+  if (r.count === 0) return s + ` <span class="incomplete-note badge-mini" title="本期未出刀">🔴 未出刀</span>`;
+  if (r.count < 3) return s + ` <span class="incomplete-note badge-mini" title="缺 ${3 - r.count} 刀">🔴 缺${3 - r.count}</span>`;
+  return s;
 }
 
 function renderLegend(p) {
@@ -830,6 +859,7 @@ function renderLegend(p) {
   if (p.waterBoss) items.push(`<span class="item"><span class="water">三刀水</span> = 三刀均打${p.waterBoss}</span>`);
   items.push('<span class="item"><span class="incomplete-note">🔴 缺刀</span> = 不足三刀（整行红底）</span>');
   items.push('<span class="item"><span class="miss">未出刀</span> = 联盟在册但本期一刀未打</span>');
+  items.push('<span class="item"><span class="gone-badge">已退盟</span> = 已不在最新联盟 32 人在册名单</span>');
   items.push('<span class="item"><span class="prev-new">✨ 新</span> = 本期新入榜</span>');
   items.push('<span class="item"><span class="note-change-up">▲提升N</span> / <span class="note-change-down">▼下降N</span> 见上一期排名列</span>');
   $("legend").innerHTML = items.join("");
