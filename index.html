@@ -82,6 +82,46 @@
   }
   .header .subtitle { color: var(--muted); margin-top: 8px; font-size: 14px; letter-spacing: 1px; }
 
+  /* 期数切换 */
+  .period-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+  .ptab {
+    padding: 9px 24px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: rgba(255,255,255,.92);
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(31,36,48,.07);
+    transition: transform .18s, border-color .18s, background .18s, box-shadow .18s;
+  }
+  .ptab:hover { transform: translateY(-1px); border-color: #c3cae0; }
+  .ptab.active {
+    background: linear-gradient(135deg, #5b6ee8, #9b59b6);
+    color: #fff;
+    border-color: transparent;
+    box-shadow: 0 6px 16px rgba(91,110,232,.38);
+  }
+  .ptab .ptag {
+    display: inline-block;
+    font-size: 11px;
+    padding: 1px 8px;
+    border-radius: 999px;
+    margin-left: 6px;
+    vertical-align: 1px;
+    background: #fff3bf;
+    color: #7a6000;
+  }
+  .ptab.active .ptag { background: rgba(255,255,255,.28); color: #fff; }
+
   /* 前三名领奖台 */
   .podium {
     display: grid;
@@ -269,6 +309,11 @@
   .boss-青瓜 { background: #e8f7ec; color: #27763f; }
   .boss-重金属音乐 { background: #f3e8fd; color: #7b3fa0; }
   .boss-秘材H { background: #fff3e0; color: #b26a00; }
+  .boss-重装狂战 { background: #fde3e3; color: #c92a2a; }
+  .boss-古铁 { background: #e1effd; color: #1864ab; }
+  .boss-双环 { background: #efe9fc; color: #7048e8; }
+  .boss-过激派 { background: #e2f6e9; color: #2b8a3e; }
+  .boss-炽焰B { background: #ffefd9; color: #d9480f; }
 
   /* 三刀水备注美化 */
   .water {
@@ -524,6 +569,9 @@
     .header { padding: 20px 12px 18px; border-radius: 16px; }
     .header h1 { font-size: 20px; letter-spacing: 1px; }
     .header .subtitle { font-size: 12px; }
+    .period-tabs { gap: 8px; margin-bottom: 14px; }
+    .ptab { padding: 7px 16px; font-size: 12px; }
+    .ptab .ptag { font-size: 10px; padding: 1px 6px; }
     .stats-bar { grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 14px; }
     .stat-card { padding: 10px 8px; }
     .stat-card .num { font-size: 19px; }
@@ -589,8 +637,10 @@
 <div class="container">
   <div class="header">
     <h1>⚔️ 工会战伤害统计 ⚔️</h1>
-    <div class="subtitle">本期数据与糖王锐评由行天游整理提供；三刀水（三刀均打铁匠）是高难 Boss，坚持出刀就值得鼓励 💪</div>
+    <div class="subtitle" id="subtitle"></div>
   </div>
+
+  <div class="period-tabs" id="period-tabs"></div>
 
   <div class="stats-bar">
     <div class="stat-card"><div class="num" id="stat-players">-</div><div class="label">👥 玩家总数</div></div>
@@ -605,12 +655,7 @@
     <input id="search" type="search" placeholder="🔍 搜索玩家名 / 锐评关键词，快速定位" autocomplete="off">
   </div>
 
-  <div class="legend">
-    <span class="item"><span class="water">三刀水</span> = 三刀均打铁匠</span>
-    <span class="item"><span class="incomplete-note">🔴 缺刀</span> = 不足三刀（整行红底）</span>
-    <span class="item"><span class="prev-new">✨ 新</span> = 本期新入榜</span>
-    <span class="item"><span class="note-change-up">▲提升N</span> / <span class="note-change-down">▼下降N</span> 见上一期排名列</span>
-  </div>
+  <div class="legend" id="legend"></div>
 
   <div class="view-toggle">
     <button id="view-toggle-btn">📱 切换卡片视图</button>
@@ -640,6 +685,7 @@
   <div class="footer">
     <div id="warn-list"></div>
     <div style="margin-top:10px">总伤害 = 三刀原始数值求和后再换算为亿（保留一位小数），避免分项四舍五入尾差</div>
+    <div style="margin-top:6px;color:#a6afc4">点击顶部「第一期 / 第二期」按钮可切换查看各期数据，默认展示最新一期</div>
   </div>
 </div>
 
@@ -649,121 +695,172 @@
 <!-- 不蒜子访问统计（真实全站共享计数） -->
 <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 <script>
-const data = [
-  { player:"花绮妙", hits:[["火神R",9093677532],["铁匠",9563481571],["铁匠",9478513209]] },
-  { player:"云小溪", hits:[["青瓜",5544549674],["重金属音乐",5793700105],["秘材H",10510510630]] },
-  { player:"清蒸红烧LIYU", hits:[["秘材H",6969254440],["火神R",7290186157],["青瓜",5261158385]] },
-  { player:"青柠", hits:[["秘材H",7413314892],["重金属音乐",4991063936],["青瓜",5925838400]] },
-  { player:"千岛佳", hits:[["秘材H",6815863591],["铁匠",5506347714],["重金属音乐",5789533955]] },
-  { player:"吃饱不想家", hits:[["重金属音乐",5512145665],["火神R",6922910966],["铁匠",4546303674]] },
-  { player:"梦夜雨", hits:[["青瓜",5306392826],["重金属音乐",4864974831],["秘材H",6529781865]] },
-  { player:"KKK影", hits:[["铁匠",3262850160],["铁匠",5342610995],["铁匠",7088648112]] },
-  { player:"指挥官", hits:[["铁匠",3306846061],["秘材H",6494712536],["铁匠",4634889204]] },
-  { player:"绯色", hits:[["铁匠",3256026272],["秘材H",6420781691],["铁匠",4733361469]] },
-  { player:"TRIGGER", hits:[["秘材H",6030281002],["火神R",4583236314],["青瓜",3681193115]] },
-  { player:"辞忧", hits:[["重金属音乐",3346289008],["火神R",4949344730],["青瓜",4892820165]] },
-  { player:"如遇", hits:[["铁匠",2979366420],["铁匠",3087887251],["铁匠",6187524515]] },
-  { player:"非洲小萌新", hits:[["铁匠",1812609012],["铁匠",4748800190],["铁匠",5546885245]] },
-  { player:"北冥虎纹鲨鱼", hits:[["秘材H",5370523847],["青瓜",4598089286],["火神R",1450125613]] },
-  { player:"枫葉繁花", hits:[["铁匠",2746142934],["铁匠",4527367127],["铁匠",3700220917]] },
-  { player:"邃愿", hits:[["青瓜",1387658476],["火神R",4145853648],["重金属音乐",5084813560]] },
-  { player:"奈乐", hits:[["铁匠",2556592121],["铁匠",3758657522],["重金属音乐",3941205744]] },
-  { player:"德胜", hits:[["铁匠",3299964722],["铁匠",1717500195],["铁匠",4380215906]] },
-  { player:"苏沐瞳", hits:[["秘材H",2864927879],["铁匠",2979537575],["重金属音乐",2596646990]] },
-  { player:"夜夜", hits:[["青瓜",501473985],["秘材H",5909871227]] },
-  { player:"5MMM", hits:[["铁匠",1113920379],["铁匠",1764648206],["铁匠",2910067719]] },
-  { player:"厨厨厨", hits:[["铁匠",593084602],["铁匠",1391930643],["铁匠",3690169432]] },
-  { player:"棱镜", hits:[["火神R",2107566102],["火神R",3448065705]] },
-  { player:"希望", hits:[["铁匠",4794460466]] },
-  { player:"教官", hits:[["铁匠",1123347844],["铁匠",889740169],["铁匠",2601933479]] },
-  { player:"暗星", hits:[["铁匠",4308226694],["重金属音乐",4419081592],["火神R",4921615525]] },
-  { player:"君情其情", hits:[["秘材H",1303763959],["铁匠",1120451747],["铁匠",1866256956]] },
-  { player:"行天游", hits:[["青瓜",1063845129],["火神R",1252805377],["重金属音乐",1248537239]] },
-  { player:"WAYNE", hits:[["铁匠",2579237708],["铁匠",663233325],["铁匠",178853501]] },
-  { player:"南山", hits:[["铁匠",151349459],["铁匠",863546644],["铁匠",1347633736]] },
-  { player:"博哥儿", hits:[["铁匠",276935353],["铁匠",514930979],["铁匠",1348704466]] },
+/* ==================== 多期数据 ====================
+   新一期数据更新方法：
+   1. 在 PERIODS 数组末尾新增一期对象（label / subtitle / waterBoss / data / sugarComments）
+   2. data 每名玩家: { player, hits: [[Boss, 伤害原始值], ...] }
+   3. "上一期排名"自动取自上一期榜单；改名玩家用 alias 做映射（当前名 -> 上期名）
+   4. 页面默认展示数组中最后一期（最新一期）
+==================================================== */
+const PERIODS = [
+  {
+    id: 1,
+    label: "第一期",
+    subtitle: "本期数据与糖王锐评由行天游整理提供；三刀水（三刀均打铁匠）是高难 Boss，坚持出刀就值得鼓励 💪",
+    waterBoss: "铁匠",
+    data: [
+      { player:"花绮妙", hits:[["火神R",9093677532],["铁匠",9563481571],["铁匠",9478513209]] },
+      { player:"云小溪", hits:[["青瓜",5544549674],["重金属音乐",5793700105],["秘材H",10510510630]] },
+      { player:"清蒸红烧LIYU", hits:[["秘材H",6969254440],["火神R",7290186157],["青瓜",5261158385]] },
+      { player:"青柠", hits:[["秘材H",7413314892],["重金属音乐",4991063936],["青瓜",5925838400]] },
+      { player:"千岛佳", hits:[["秘材H",6815863591],["铁匠",5506347714],["重金属音乐",5789533955]] },
+      { player:"吃饱不想家", hits:[["重金属音乐",5512145665],["火神R",6922910966],["铁匠",4546303674]] },
+      { player:"梦夜雨", hits:[["青瓜",5306392826],["重金属音乐",4864974831],["秘材H",6529781865]] },
+      { player:"KKK影", hits:[["铁匠",3262850160],["铁匠",5342610995],["铁匠",7088648112]] },
+      { player:"指挥官", hits:[["铁匠",3306846061],["秘材H",6494712536],["铁匠",4634889204]] },
+      { player:"绯色", hits:[["铁匠",3256026272],["秘材H",6420781691],["铁匠",4733361469]] },
+      { player:"TRIGGER", hits:[["秘材H",6030281002],["火神R",4583236314],["青瓜",3681193115]] },
+      { player:"辞忧", hits:[["重金属音乐",3346289008],["火神R",4949344730],["青瓜",4892820165]] },
+      { player:"如遇", hits:[["铁匠",2979366420],["铁匠",3087887251],["铁匠",6187524515]] },
+      { player:"非洲小萌新", hits:[["铁匠",1812609012],["铁匠",4748800190],["铁匠",5546885245]] },
+      { player:"北冥虎纹鲨鱼", hits:[["秘材H",5370523847],["青瓜",4598089286],["火神R",1450125613]] },
+      { player:"枫葉繁花", hits:[["铁匠",2746142934],["铁匠",4527367127],["铁匠",3700220917]] },
+      { player:"邃愿", hits:[["青瓜",1387658476],["火神R",4145853648],["重金属音乐",5084813560]] },
+      { player:"奈乐", hits:[["铁匠",2556592121],["铁匠",3758657522],["重金属音乐",3941205744]] },
+      { player:"德胜", hits:[["铁匠",3299964722],["铁匠",1717500195],["铁匠",4380215906]] },
+      { player:"苏沐瞳", hits:[["秘材H",2864927879],["铁匠",2979537575],["重金属音乐",2596646990]] },
+      { player:"夜夜", hits:[["青瓜",501473985],["秘材H",5909871227]] },
+      { player:"5MMM", hits:[["铁匠",1113920379],["铁匠",1764648206],["铁匠",2910067719]] },
+      { player:"厨厨厨", hits:[["铁匠",593084602],["铁匠",1391930643],["铁匠",3690169432]] },
+      { player:"棱镜", hits:[["火神R",2107566102],["火神R",3448065705]] },
+      { player:"希望", hits:[["铁匠",4794460466]] },
+      { player:"教官", hits:[["铁匠",1123347844],["铁匠",889740169],["铁匠",2601933479]] },
+      { player:"暗星", hits:[["铁匠",4308226694],["重金属音乐",4419081592],["火神R",4921615525]] },
+      { player:"君情其情", hits:[["秘材H",1303763959],["铁匠",1120451747],["铁匠",1866256956]] },
+      { player:"行天游", hits:[["青瓜",1063845129],["火神R",1252805377],["重金属音乐",1248537239]] },
+      { player:"WAYNE", hits:[["铁匠",2579237708],["铁匠",663233325],["铁匠",178853501]] },
+      { player:"南山", hits:[["铁匠",151349459],["铁匠",863546644],["铁匠",1347633736]] },
+      { player:"博哥儿", hits:[["铁匠",276935353],["铁匠",514930979],["铁匠",1348704466]] },
+    ],
+    sugarComments: {
+      "花绮妙": "随便一刀便是你们的极限，强如神",
+      "云小溪": "最高一刀105亿还有谁？脆了脆了",
+      "清蒸红烧LIYU": "不愧是我看中的千里马，黑马中的黑马",
+      "青柠": "老青依旧稳定发挥，可惜缺了个水刀，不然稳坐两百。",
+      "千岛佳": "曾被嘲讽逢场作戏，今朝锋芒出鞘，已然凌驾众人之上",
+      "吃饱不想家": "强者总是最后才出场的，强强强！",
+      "梦夜雨": "梦兄果然强势，实力均衡，强强强！",
+      "KKK影": "K博士文臣来的，能打这么高，都比你们武将强了",
+      "指挥官": "强强强",
+      "绯色": "绯佬稳定发挥，还刀了两个水刀，实力强悍",
+      "TRIGGER": "居然比上次打了这么多，虽说没有刀水，也很强了",
+      "辞忧": "可以可以，也进百亿了，强强强",
+      "如遇": "大佬高深莫测，无法评价",
+      "非洲小萌新": "大哥牛逼，三刀水还能进百亿，属实让小弟刮目相看",
+      "北冥虎纹鲨鱼": "大佬高深莫测，无法评价",
+      "枫葉繁花": "这次可惜了，没发挥出全部实力，但是进百亿了，顺便感谢老青，留下来好吗？",
+      "夜夜": "刀最快，跑最快",
+      "邃愿": "被爱情拘束，但依旧稳定发挥",
+      "奈乐": "稳住，两刀水",
+      "德胜": "三刀水",
+      "苏沐瞳": "小苏厉害了，可观可观",
+      "5MMM": "稳",
+      "棱镜": "皇上万岁！",
+      "厨厨厨": "三刀水，抽空时间打的，很给面子，可以可以",
+      "教官": "三刀水，向官敬礼！",
+      "希望": "很神秘",
+      "暗星": "搬图大师，情绪价值给的很足",
+      "君情其情": "7天不回来的大佬，竟然回来了！！！三刀水，可以可以",
+      "行天游": "别看了，我是唐人，下面是神人",
+      "WAYNE": "三刀水，前线士！",
+      "南山": "我的发？是三刀水，南山叔我会好好把你刻在耻棒上的",
+      "博哥儿": "不是哥们儿，读快点和名字就一样了",
+    },
+    // 第一期的"上一期"排名（更早期截图数据）
+    prevRank: {
+      "花绮妙": 1, "云小溪": 2, "非洲小萌新": 3, "吃饱不想家": 4, "梦夜雨": 5,
+      "伊羡": 6, "青柠": 7, "北冥虎纹鲨鱼": 8, "枫葉繁花": 9, "KKK影": 10,
+      "绯色": 11, "TRIGGER": 12, "德胜": 13, "希望": 14, "奈乐": 15,
+      "辞忧": 16, "暗星": 17, "邃愿": 18, "教官": 19, "指挥官": 20,
+      "博哥儿": 21, "5MMM": 22, "君情其情": 23, "棱镜": 24, "行天游": 25,
+      "WAYNE": 26, "千岛佳": 27, "夜夜": 28, "如遇": 29, "花园": 30,
+      "厨厨厨": 31, "结灯": 32,
+    },
+  },
+  {
+    id: 2,
+    label: "第二期",
+    tag: "最新",
+    subtitle: "HARD · 第 2 天 · 本期数据与糖王锐评由行天游整理提供",
+    waterBoss: null,
+    data: [
+      { player:"指挥官", hits:[["过激派",3222847193],["炽焰B",3411109801],["双环",5205314363]] },
+      { player:"非洲小萌新", hits:[["炽焰B",3703450355],["古铁",6048609988],["双环",5513165480]] },
+      { player:"君情其情", hits:[["双环",1545922892],["过激派",1688997740],["古铁",2485078659]] },
+      { player:"如遇", hits:[["古铁",4833261122],["过激派",6030724143],["双环",5554710791]] },
+      { player:"派大星", hits:[["过激派",5383436880],["双环",4031359435],["古铁",5091763714]] },
+      { player:"梦夜雨", hits:[["双环",5838847971],["过激派",7376862552],["古铁",5800793622]] },
+      { player:"吃饱不想家", hits:[["古铁",4101382714],["重装狂战",3653651946],["过激派",6890260315]] },
+      { player:"辞忧", hits:[["古铁",4913340343],["重装狂战",3900024927],["过激派",7808105861]] },
+      { player:"清蒸红烧", hits:[["过激派",5654644672],["古铁",5465526119],["双环",6463786915]] },
+      { player:"棱镜", hits:[["过激派",6402303358]] },
+      { player:"德胜", hits:[["双环",4810737025],["古铁",4265780049],["炽焰B",237094474]] },
+      { player:"千岛佳", hits:[["炽焰B",3100715537],["过激派",7992744807],["古铁",5149300069]] },
+      { player:"教官", hits:[["炽焰B",946369362],["炽焰B",1657888959],["古铁",1086729921]] },
+      { player:"南山", hits:[["炽焰B",1365765973],["炽焰B",1283106235],["古铁",2121563255]] },
+      { player:"5MMM", hits:[["炽焰B",2891722865],["古铁",3632692731],["古铁",4864669794]] },
+      { player:"KKK影", hits:[["炽焰B",2277285582],["炽焰B",4651975508],["炽焰B",3564183679]] },
+      { player:"厨厨厨", hits:[["古铁",830908705],["炽焰B",3400565150]] },
+      { player:"行天游", hits:[["古铁",1316862426],["重装狂战",594507354],["古铁",1291085304]] },
+      { player:"暗星", hits:[["重装狂战",3580510754],["古铁",2750702795],["古铁",4839157328]] },
+      { player:"博哥儿", hits:[["重装狂战",1605917453],["古铁",1318105946],["重装狂战",2041338651]] },
+      { player:"夜夜", hits:[["炽焰B",2399188989],["重装狂战",2825974557],["古铁",4641317040]] },
+      { player:"绯色", hits:[["双环",486361475],["过激派",7231713948],["重装狂战",3926066241]] },
+      { player:"苏沐瞳", hits:[["过激派",2936433203],["重装狂战",2279798072],["炽焰B",1449800487]] },
+      { player:"花绮妙", hits:[["古铁",6021273360],["过激派",8534701475],["古铁",8851805649]] },
+      { player:"青柠", hits:[["过激派",7863823145],["古铁",6860919635],["双环",5514568875]] },
+      { player:"云小溪", hits:[["重装狂战",5216506491],["古铁",5757402299],["过激派",8624312974]] },
+      { player:"奈乐", hits:[["过激派",6106989118],["重装狂战",3775547065],["双环",4114692339]] },
+      { player:"TRIGGER", hits:[["重装狂战",3379496162],["过激派",6238820226],["双环",3891719278]] },
+      { player:"雪花", hits:[["过激派",11818153368],["古铁",9200495412],["双环",9663610042]] },
+    ],
+    sugarComments: {
+      "雪花": "乌云密布，迎接新神的降临，仅一次战斗便突破了联盟记录，同级人无法跨过的鸿沟，刀最早之人，拳头只是想快点喝血罢了，全体起立！🫡",
+      "花绮妙": "空悲切，还是输给了现代最强，但您在我心中的地位还是无法撼动，历史最强！！！",
+      "青柠": "我底妈，每都能突破极限，实力深不可测堪比卡卡罗特，不多说本唐准备开房",
+      "云小溪": "什么叫稳？非云小溪莫属",
+      "梦夜雨": "梦兄还在卷盟友们！感觉是和老青一个骨子里刻出来的，突破极限直到最高！！！下次直接飞升200",
+      "清蒸红烧": "稳定发挥，清蒸红烧没吃过，下次尝一下😋",
+      "辞忧": "！？强强强？！今非夕比(其实我在旁边看着呢🤫)",
+      "如遇": "强强强，观察局势出刀之人",
+      "绯色": "绯佬牛牛，绯红之王？",
+      "吃饱不想家": "本人代打，这就当作我的刀分不过分吧。不同意？上来说话",
+      "派大星": "强强强，上等马",
+      "奈乐": "稳定",
+      "TRIGGER": "本人的哦泥酱，群友好大佬，喜欢喜欢",
+      "5MMM": "这次这么猛的？高了50亿，真别偷偷演我了呀，大佬们",
+      "暗星": "强强强",
+      "KKK影": "不多说，掌握100的神，你k博士看似没提升，实则看腻了龙争虎斗，只想安安稳稳的拿下100亿罢了",
+      "苏沐瞳": "何时垫底",
+      "棱镜": "上朝",
+      "博哥儿": "稳，注意注意下方将是蛆王领地！！！",
+      "南山": "区虫的领导，最豪之人，只是不想和你们这些低级将领斗争如此",
+      "厨厨厨": "欢迎加入区王组织",
+      "教官": "刀了",
+      "千岛佳": "最晚出刀之人",
+      "行天游": "蛆王降临！！！看到止文字的都将变成区的一员",
+    },
+    // "上一期排名"自动取自第一期榜单；改名玩家在此映射：当前名 -> 上期名
+    alias: { "清蒸红烧": "清蒸红烧LIYU" },
+  },
 ];
-
-// 上一期排名（从截图提取）
-
-// 糖王锐评（来自用户提供的本人评价截图）
-const sugarComments = {
-  "花绮妙": "随便一刀便是你们的极限，强如神",
-  "云小溪": "最高一刀105亿还有谁？脆了脆了",
-  "清蒸红烧LIYU": "不愧是我看中的千里马，黑马中的黑马",
-  "青柠": "老青依旧稳定发挥，可惜缺了个水刀，不然稳坐两百。",
-  "千岛佳": "曾被嘲讽逢场作戏，今朝锋芒出鞘，已然凌驾众人之上",
-  "吃饱不想家": "强者总是最后才出场的，强强强！",
-  "梦夜雨": "梦兄果然强势，实力均衡，强强强！",
-  "KKK影": "K博士文臣来的，能打这么高，都比你们武将强了",
-  "指挥官": "强强强",
-  "绯色": "绯佬稳定发挥，还刀了两个水刀，实力强悍",
-  "TRIGGER": "居然比上次打了这么多，虽说没有刀水，也很强了",
-  "辞忧": "可以可以，也进百亿了，强强强",
-  "如遇": "大佬高深莫测，无法评价",
-  "非洲小萌新": "大哥牛逼，三刀水还能进百亿，属实让小弟刮目相看",
-  "北冥虎纹鲨鱼": "大佬高深莫测，无法评价",
-  "枫葉繁花": "这次可惜了，没发挥出全部实力，但是进百亿了，顺便感谢老青，留下来好吗？",
-  "夜夜": "刀最快，跑最快",
-  "邃愿": "被爱情拘束，但依旧稳定发挥",
-  "奈乐": "稳住，两刀水",
-  "德胜": "三刀水",
-  "苏沐瞳": "小苏厉害了，可观可观",
-  "5MMM": "稳",
-  "棱镜": "皇上万岁！",
-  "厨厨厨": "三刀水，抽空时间打的，很给面子，可以可以",
-  "教官": "三刀水，向官敬礼！",
-  "希望": "很神秘",
-  "暗星": "搬图大师，情绪价值给的很足",
-  "君情其情": "7天不回来的大佬，竟然回来了！！！三刀水，可以可以",
-  "行天游": "别看了，我是唐人，下面是神人",
-  "WAYNE": "三刀水，前线士！",
-  "南山": "我的发？是三刀水，南山叔我会好好把你刻在耻棒上的",
-  "博哥儿": "不是哥们儿，读快点和名字就一样了",
-};
-
-const prevRank = {
-  "花绮妙": 1,
-  "云小溪": 2,
-  "非洲小萌新": 3,
-  "吃饱不想家": 4,
-  "梦夜雨": 5,
-  "伊羡": 6,
-  "青柠": 7,
-  "北冥虎纹鲨鱼": 8,
-  "枫葉繁花": 9,
-  "KKK影": 10,
-  "绯色": 11,
-  "TRIGGER": 12,
-  "德胜": 13,
-  "希望": 14,
-  "奈乐": 15,
-  "辞忧": 16,
-  "暗星": 17,
-  "邃愿": 18,
-  "教官": 19,
-  "指挥官": 20,
-  "博哥儿": 21,
-  "5MMM": 22,
-  "君情其情": 23,
-  "棱镜": 24,
-  "行天游": 25,
-  "WAYNE": 26,
-  "千岛佳": 27,
-  "夜夜": 28,
-  "如遇": 29,
-  "花园": 30,
-  "厨厨厨": 31,
-  "结灯": 32,
-};
 
 const toYi = n => Math.round(n / 1e8 * 10) / 10;
 
-// 预处理
-const rows = data.map(r => {
+// 预处理每一期
+const processed = PERIODS.map(p => p.data.map(r => {
   const totalRaw = r.hits.reduce((s, h) => s + h[1], 0);
-  const isWater = r.hits.length === 3 && r.hits.every(h => h[0] === "铁匠");
-  const lastRank = prevRank[r.player];
+  const isWater = !!p.waterBoss && r.hits.length === 3 && r.hits.every(h => h[0] === p.waterBoss);
   return {
     player: r.player,
     hits: r.hits,
@@ -772,59 +869,45 @@ const rows = data.map(r => {
     hitYi: r.hits.map(h => toYi(h[1])),
     isWater,
     count: r.hits.length,
-    lastRank,
-    sugarComment: sugarComments[r.player] || "",
+    sugarComment: p.sugarComments[r.player] || "",
   };
+}));
+
+// 每期"按总伤害"的排名表（供下一期"上一期排名"回溯）
+const rankMaps = processed.map(rows => {
+  const sorted = [...rows].sort((a, b) => b.totalRaw - a.totalRaw);
+  return new Map(sorted.map((r, i) => [r.player, i + 1]));
 });
 
-// 统计
-const players = rows.length;
-const avgYi = toYi(rows.reduce((s, r) => s + r.totalRaw, 0) / players);
-const maxYi = Math.max(...rows.map(r => r.totalYi));
-const missCount = rows.filter(r => r.count < 3).length;
-document.getElementById("stat-players").textContent = players + " 人";
-document.getElementById("stat-avg").textContent = avgYi + " 亿";
-document.getElementById("stat-max").textContent = maxYi + " 亿";
-document.getElementById("stat-miss").textContent = missCount + " 人";
+function getPrevRank(pi, player) {
+  const p = PERIODS[pi];
+  const key = (p.alias && p.alias[player]) || player;
+  if (p.prevRank) return p.prevRank[key];        // 显式提供的历史排名
+  if (pi > 0) return rankMaps[pi - 1].get(key);  // 自动取上一期名次
+  return undefined;
+}
 
-// 前三名领奖台
-(function renderPodium() {
-  const medals = ["🥇", "🥈", "🥉"], cls = ["p1", "p2", "p3"];
-  const top3 = [...rows].sort((a, b) => b.totalRaw - a.totalRaw).slice(0, 3);
-  document.getElementById("podium").innerHTML = top3.map((r, i) => {
-    const best = [...r.hits].sort((a, b) => b[1] - a[1])[0];
-    return `<div class="podium-card ${cls[i]}">
-      <div class="medal">${medals[i]}</div>
-      <div class="name">${escHtml(r.player)}</div>
-      <div class="score">${r.totalYi.toFixed(1)} 亿</div>
-      <div class="best">最高一刀 ${toYi(best[1])} 亿 · ${escHtml(best[0])}</div>
-    </div>`;
-  }).join("");
-})();
-
-// 缺刀提示
-const missRows = rows.filter(r => r.count < 3).sort((a, b) => a.count - b.count);
-document.getElementById("warn-list").innerHTML =
-  '<div class="warn-box">⚠️ 以下玩家刀数不足三刀，可补充缺失数据：<br>' +
-  missRows.map(r => `&nbsp;&nbsp;• ${r.player}：当前 <b>${r.count}</b> 刀`).join("<br>") +
-  "</div>";
-
-// 排序状态
+// ==================== 状态 ====================
+let curIdx = PERIODS.length - 1; // 默认展示最新一期
+let rows = [];
 let sortKey = "total", sortAsc = false;
-let searchTerm = ""; // 玩家搜索关键词
-const tbody = document.getElementById("tbody");
-const tableWrap = document.querySelector(".table-wrap");
-const cardList = document.getElementById("card-list");
-const viewToggleBtn = document.getElementById("view-toggle-btn");
+let searchTerm = "";
 // 默认视图：PC 用表格，手机用卡片；手动切换后会记住
 let viewMode = localStorage.getItem("gvg_view_mode") || (window.innerWidth <= 768 ? "card" : "table");
+
+const $ = id => document.getElementById(id);
+const tbody = $("tbody");
+const tableWrap = document.querySelector(".table-wrap");
+const cardList = $("card-list");
+const viewToggleBtn = $("view-toggle-btn");
+const tabsEl = $("period-tabs");
 
 function hitVal(r, idx) { return idx < r.hits.length ? r.hits[idx][1] : -1; }
 function hitYiStr(r, idx) {
   if (idx >= r.hits.length) return '<span class="miss">— 缺</span>';
   const [boss, dmg] = r.hits[idx];
   const cls = "boss-" + boss.replace(/[^\u4e00-\u9fa5A-Za-z]/g, "");
-  return `${toYi(dmg)}<span class="boss-tag ${cls}">${boss}</span>`;
+  return `${toYi(dmg)}<span class="boss-tag ${cls}">${escHtml(boss)}</span>`;
 }
 
 function prevRankHtml(r, currentRank) {
@@ -838,7 +921,7 @@ function prevRankHtml(r, currentRank) {
 
 function sugarHtml(r) {
   let text = r.sugarComment || "";
-  // 三刀水玩家统一在锐评里带上“三刀水”文字；若原评语已含则避免重复
+  // 三刀水玩家统一在锐评里带上"三刀水"文字；若原评语已含则避免重复
   if (r.isWater && !text.includes("三刀水")) {
     text = (text ? "三刀水，" + text : "三刀水");
   }
@@ -855,6 +938,27 @@ function playerBadges(r) {
   return "";
 }
 
+function renderLegend(p) {
+  const items = [];
+  if (p.waterBoss) items.push(`<span class="item"><span class="water">三刀水</span> = 三刀均打${p.waterBoss}</span>`);
+  items.push('<span class="item"><span class="incomplete-note">🔴 缺刀</span> = 不足三刀（整行红底）</span>');
+  items.push('<span class="item"><span class="prev-new">✨ 新</span> = 本期新入榜</span>');
+  items.push('<span class="item"><span class="note-change-up">▲提升N</span> / <span class="note-change-down">▼下降N</span> 见上一期排名列</span>');
+  $("legend").innerHTML = items.join("");
+}
+
+function renderTabs() {
+  const order = PERIODS.map((p, i) => ({ p, i })).reverse(); // 最新一期排最前
+  tabsEl.innerHTML = order.map(({ p, i }) =>
+    `<button class="ptab ${i === curIdx ? "active" : ""}" data-i="${i}">${p.label}${p.tag ? `<span class="ptag">${p.tag}</span>` : ""}</button>`
+  ).join("");
+}
+
+tabsEl.addEventListener("click", e => {
+  const btn = e.target.closest(".ptab");
+  if (btn && +btn.dataset.i !== curIdx) loadPeriod(+btn.dataset.i);
+});
+
 function render() {
   // 始终按总伤害排定名次徽章
   const byTotal = [...rows].sort((a, b) => b.totalRaw - a.totalRaw);
@@ -866,7 +970,6 @@ function render() {
     switch (sortKey) {
       case "rank": case "total": va = a.totalRaw; vb = b.totalRaw; break;
       case "prev":
-        // 上期排名值：未出现排在最后；值越大上期名次越低
         va = a.lastRank === undefined ? 999 : a.lastRank;
         vb = b.lastRank === undefined ? 999 : b.lastRank;
         break;
@@ -898,7 +1001,7 @@ function render() {
     return `<tr class="${(incomplete ? "incomplete" : "") + topCls}">
       <td><span class="rank ${rankCls}">${rank}</span></td>
       <td>${prevRankHtml(r, rank)}</td>
-      <td class="player">${r.player}${playerBadges(r)}</td>
+      <td class="player">${escHtml(r.player)}${playerBadges(r)}</td>
       <td class="total">${r.totalYi.toFixed(1)}</td>
       <td>${hitYiStr(r,0)}</td>
       <td>${hitYiStr(r,1)}</td>
@@ -916,7 +1019,7 @@ function render() {
       <div class="player-card ${incomplete ? "incomplete" : ""}">
         <div class="card-header">
           <span class="rank ${rankCls}">${rank}</span>
-          <span class="player">${r.player}${playerBadges(r)}</span>
+          <span class="player">${escHtml(r.player)}${playerBadges(r)}</span>
           <span class="total">${r.totalYi.toFixed(1)}亿</span>
         </div>
         <div class="card-body">
@@ -937,6 +1040,50 @@ function render() {
   });
 }
 
+function loadPeriod(idx) {
+  curIdx = idx;
+  const p = PERIODS[idx];
+  rows = processed[idx].map(r => ({ ...r, lastRank: getPrevRank(idx, r.player) }));
+
+  // 顶部说明 & 图例 & 期数按钮
+  $("subtitle").textContent = p.subtitle;
+  renderLegend(p);
+  renderTabs();
+
+  // 统计卡
+  const players = rows.length;
+  const avgYi = toYi(rows.reduce((s, r) => s + r.totalRaw, 0) / players);
+  const maxYi = Math.max(...rows.map(r => r.totalYi));
+  const missCount = rows.filter(r => r.count < 3).length;
+  $("stat-players").textContent = players + " 人";
+  $("stat-avg").textContent = avgYi + " 亿";
+  $("stat-max").textContent = maxYi + " 亿";
+  $("stat-miss").textContent = missCount + " 人";
+
+  // 前三名领奖台
+  const medals = ["🥇", "🥈", "🥉"], cls = ["p1", "p2", "p3"];
+  const top3 = [...rows].sort((a, b) => b.totalRaw - a.totalRaw).slice(0, 3);
+  $("podium").innerHTML = top3.map((r, i) => {
+    const best = [...r.hits].sort((a, b) => b[1] - a[1])[0];
+    return `<div class="podium-card ${cls[i]}">
+      <div class="medal">${medals[i]}</div>
+      <div class="name">${escHtml(r.player)}</div>
+      <div class="score">${r.totalYi.toFixed(1)} 亿</div>
+      <div class="best">最高一刀 ${toYi(best[1])} 亿 · ${escHtml(best[0])}</div>
+    </div>`;
+  }).join("");
+
+  // 缺刀提示
+  const missRows = rows.filter(r => r.count < 3).sort((a, b) => a.count - b.count);
+  $("warn-list").innerHTML = missRows.length
+    ? '<div class="warn-box">⚠️ 以下玩家刀数不足三刀，可补充缺失数据：<br>' +
+      missRows.map(r => `&nbsp;&nbsp;• ${escHtml(r.player)}：当前 <b>${r.count}</b> 刀`).join("<br>") +
+      "</div>"
+    : "";
+
+  render();
+}
+
 document.querySelectorAll("#tbl thead th").forEach(th => {
   th.addEventListener("click", () => {
     const key = th.dataset.key;
@@ -947,7 +1094,7 @@ document.querySelectorAll("#tbl thead th").forEach(th => {
 });
 
 // 玩家搜索：输入即过滤表格与卡片
-document.getElementById("search").addEventListener("input", e => {
+$("search").addEventListener("input", e => {
   searchTerm = e.target.value.trim().toLowerCase();
   render();
 });
@@ -972,15 +1119,14 @@ viewToggleBtn.addEventListener("click", () => {
 
 // 滑动提示：滚动后自动淡出
 tableWrap.addEventListener("scroll", () => {
-  const hint = document.getElementById("scroll-hint");
+  const hint = $("scroll-hint");
   if (hint) hint.style.opacity = "0";
 }, { passive: true });
 
 // 访问统计已改用不蒜子（busuanzi）真实计数服务，见页脚引入的脚本
-// 页面浏览量显示在右下角：<span id="busuanzi_container_site_pv"> 内自动更新
 
 // 回到顶部按钮（仅在移动端显示）
-const backToTop = document.getElementById("back-to-top");
+const backToTop = $("back-to-top");
 window.addEventListener("scroll", () => {
   if (window.innerWidth <= 768 && window.scrollY > 400) {
     backToTop.classList.add("show");
@@ -992,7 +1138,7 @@ backToTop.addEventListener("click", () => {
   window.scrollTo({ top: 0, behavior: "smooth" });
 });
 
-render();
+loadPeriod(PERIODS.length - 1);
 applyView();
 </script>
 </body>
